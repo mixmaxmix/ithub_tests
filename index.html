@@ -1,0 +1,1278 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#F1F3F8"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Тренажёр аккредитации</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: one 600px study column like a stack of exam cards; sticky progress bar on top, action bar pinned to the thumb zone */
+:root{
+  --paper:#F1F3F8; --card:#FFFFFF; --ink:#141C33; --ink-2:#525D78; --ink-3:#8790A6; --line:#DBE0EA; --line-2:#C9D0DE;
+  --accent:#2445CC; --accent-soft:#E3E8FA; --on-accent:#FFFFFF;
+  --mark:#FFE24A; --mark-ink:#1C1800;
+  --good:#127A48; --good-bg:#E0F2E7; --bad:#BF342C; --bad-bg:#FBE5E3; --warn:#8A5D00; --warn-bg:#FFF3D1;
+  --p1:#2445CC; --p2:#D4490F; --p3:#7A3CC2;
+  --lv-new:#D5DBE6; --lv-bad:#E58A83; --lv-1:#F0C45E; --lv-2:#97C766; --lv-3:#22915A;
+  --shadow:0 1px 2px rgba(20,28,51,.05),0 6px 18px rgba(20,28,51,.06);
+  --f-display:"Unbounded","Onest",system-ui,sans-serif;
+  --f-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1322; --card:#161D31; --ink:#E7EBF5; --ink-2:#A1ABC4; --ink-3:#6E7894; --line:#273049; --line-2:#36405C;
+    --accent:#8299FF; --accent-soft:#1F2A4D; --on-accent:#0E1322;
+    --mark:#EED445; --mark-ink:#191500;
+    --good:#55CF8F; --good-bg:#11301F; --bad:#FF8A80; --bad-bg:#3A191B; --warn:#F2C35B; --warn-bg:#352A10;
+    --p1:#8299FF; --p2:#FF8F5A; --p3:#C39BFF;
+    --lv-new:#2D3652; --lv-bad:#B5544E; --lv-1:#C99B2E; --lv-2:#6E9F45; --lv-3:#3DBE7C;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1322; --card:#161D31; --ink:#E7EBF5; --ink-2:#A1ABC4; --ink-3:#6E7894; --line:#273049; --line-2:#36405C;
+  --accent:#8299FF; --accent-soft:#1F2A4D; --on-accent:#0E1322;
+  --mark:#EED445; --mark-ink:#191500;
+  --good:#55CF8F; --good-bg:#11301F; --bad:#FF8A80; --bad-bg:#3A191B; --warn:#F2C35B; --warn-bg:#352A10;
+  --p1:#8299FF; --p2:#FF8F5A; --p3:#C39BFF;
+  --lv-new:#2D3652; --lv-bad:#B5544E; --lv-1:#C99B2E; --lv-2:#6E9F45; --lv-3:#3DBE7C;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:default}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:10px}
+.wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 28px;display:flex;flex-direction:column;gap:18px;min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+mark.hl{background:var(--mark);color:var(--mark-ink);padding:.06em .32em;border-radius:.3em .15em .35em .2em;-webkit-box-decoration-break:clone;box-decoration-break:clone;font-weight:600}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.muted{color:var(--ink-2)}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.hero h1{font-family:var(--f-display);font-weight:700;font-size:clamp(25px,7.2vw,34px);line-height:1.1;letter-spacing:-.01em}
+.hero h1 .hl{font-weight:700}
+.lead{color:var(--ink-2);max-width:60ch}
+
+/* progress */
+.prog{display:flex;flex-direction:column;gap:12px}
+.prog-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.big{font-family:var(--f-display);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.of{color:var(--ink-2);font-weight:500}
+.prog-cap{color:var(--ink-2);font-size:14px}
+.seg{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--lv-new);gap:2px}
+.seg span{display:block;height:100%}
+.seg.thin{height:7px;gap:1px}
+.c-new{background:var(--lv-new)} .c-bad{background:var(--lv-bad)} .c-1{background:var(--lv-1)} .c-2{background:var(--lv-2)} .c-3{background:var(--lv-3)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:0}
+.topics{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.trow{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
+.trow .seg{grid-column:1/-1}
+.trow b{font-weight:600}
+.trow .n{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+/* actions */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.act{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;min-height:92px;transition:transform .12s ease,border-color .12s ease}
+.act:active{transform:scale(.985)}
+.act:not(:disabled):hover{border-color:var(--line-2)}
+.act-t{font-weight:700;font-size:17px}
+.act-s{font-size:13px;color:var(--ink-2);line-height:1.35}
+.act.main{grid-column:1/-1;background:var(--accent);border-color:var(--accent);color:var(--on-accent);min-height:0;padding:18px 16px;flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+.act.main .act-t{font-family:var(--f-display);font-size:20px;font-weight:700}
+.act.main .act-s{color:inherit;opacity:.85}
+.act.main .go{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.18)}
+.act:disabled{opacity:.5}
+.act .cnt{font-family:var(--f-mono);font-size:12px;background:var(--bad-bg);color:var(--bad);padding:1px 7px;border-radius:99px}
+.resume{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--accent-soft);border:1px dashed var(--accent);color:var(--ink);border-radius:14px;padding:12px 14px;text-align:left}
+.resume b{color:var(--accent)}
+
+/* settings */
+.settings{display:flex;flex-direction:column;gap:12px}
+.settings h2{font-size:15px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line-2);background:transparent;border-radius:99px;padding:7px 12px;font-size:14px;font-weight:500;color:var(--ink-2)}
+.chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.segctl{display:grid;grid-template-columns:repeat(3,1fr);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.segctl button{border:0;background:transparent;border-radius:9px;padding:9px 6px;font-size:14px;font-weight:600;color:var(--ink-2)}
+.segctl button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.note{font-size:13px;color:var(--ink-2)}
+.foot{display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--ink-2);padding-bottom:8px}
+.linkbtn{background:none;border:0;padding:0;color:var(--bad);text-decoration:underline;text-underline-offset:3px;font-size:13px;align-self:flex-start}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sync{display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:none}
+.dot.on{background:var(--good)}
+
+/* card session */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px)) 10px;display:flex;flex-direction:column;gap:8px}
+.top-row{display:flex;align-items:center;gap:10px}
+.iconbtn{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);flex:none}
+.top-mid{flex:1;min-width:0;display:flex;flex-direction:column}
+.top-mid b{font-size:15px}
+.top-mid span{font-size:12px;color:var(--ink-2);font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s ease}
+.qmeta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tag{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.03em;padding:3px 8px;border-radius:7px;background:var(--card);border:1px solid var(--line);color:var(--ink-2)}
+.tag.k{background:var(--accent-soft);border-color:transparent;color:var(--ink)}
+.qtext{font-size:19px;font-weight:600;line-height:1.38;max-width:62ch}
+.task{font-size:14px;color:var(--ink-2);margin-top:-6px}
+.hint{display:flex;gap:10px;align-items:flex-start;background:var(--warn-bg);color:var(--ink);border-radius:14px;padding:12px 14px;font-size:15px}
+.hint svg{flex:none;color:var(--warn);margin-top:2px}
+.mask{font-family:var(--f-mono);letter-spacing:.12em;font-size:16px;color:var(--warn);margin-top:6px;word-break:break-word}
+
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;font-size:16px;font-weight:500;line-height:1.35;transition:border-color .12s ease,background .12s ease}
+.opt:not(:disabled):hover{border-color:var(--line-2)}
+.opt .ltr{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:var(--paper);font-family:var(--f-mono);font-size:13px;color:var(--ink-2)}
+.opt .tx{flex:1;min-width:0}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--good);background:var(--good-bg)}
+.opt.right .ltr{background:var(--good);color:var(--card)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong .ltr{background:var(--bad);color:var(--card)}
+.opt.dim{opacity:.55}
+.chain{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:14.5px}
+.chain li{display:flex;gap:8px}
+.chain li span{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);padding-top:2px;flex:none;width:16px}
+
+.typein{display:flex;flex-direction:column;gap:8px}
+.typein input{width:100%;font:inherit;font-size:18px;padding:14px 15px;border-radius:14px;border:1.5px solid var(--line-2);background:var(--card);color:var(--ink)}
+.typein input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.typein input.right{border-color:var(--good);background:var(--good-bg)}
+.typein input.wrong{border-color:var(--bad);background:var(--bad-bg);text-decoration:line-through;text-decoration-color:var(--bad)}
+.typein .note{padding-left:2px}
+.shake{animation:shake .3s ease}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* matching */
+.sub{font-size:12px;font-family:var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:-6px}
+.ml-list,.mr-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ml,.mr{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px;font-size:15px;line-height:1.38}
+.ml .tx,.mr .tx{flex:1;min-width:0}
+.ml.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.pn{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;color:var(--card);font-family:var(--f-mono);font-size:13px;font-weight:500}
+.pn.p0{background:var(--p1)} .pn.p1{background:var(--p2)} .pn.p2{background:var(--p3)} .pn.p3{background:var(--ink-2)}
+.slot{flex:none;min-width:30px;height:26px;display:grid;place-items:center;border-radius:8px;border:1.5px dashed var(--line-2);font-family:var(--f-mono);font-size:13px;color:var(--ink-3)}
+.slot.full{border-style:solid;border-color:var(--ink-2);color:var(--ink)}
+.mr .ltr{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--paper);font-family:var(--f-mono);font-size:13px;color:var(--ink-2)}
+.mr.used{background:var(--paper)}
+.mr .tags{display:flex;gap:4px;flex:none}
+.mres{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.mres li{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.mres li.ok{border-color:var(--good)}
+.mres li.no{border-color:var(--bad)}
+.mres .l{font-weight:600}
+.mres .yours{font-size:14px;color:var(--bad);text-decoration:line-through;text-decoration-color:var(--bad)}
+.mres .r{display:flex;gap:8px;align-items:flex-start}
+.mres .r svg{flex:none;margin-top:3px}
+.mres .ok-i{color:var(--good)} .mres .no-i{color:var(--bad)}
+.memo-s{font-size:14px;color:var(--ink-2);display:flex;gap:7px;align-items:flex-start}
+.memo-s svg{flex:none;color:var(--warn);margin-top:1px}
+
+/* ordering */
+.o-seq,.o-pool{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ob{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px;font-size:15px;line-height:1.38}
+.ob .tx{flex:1;min-width:0}
+.ob .num{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--accent);color:var(--on-accent);font-family:var(--f-mono);font-size:13px}
+.ob .x{flex:none;color:var(--ink-3)}
+.o-empty{border:1.5px dashed var(--line-2);border-radius:14px;padding:12px;display:flex;gap:10px;align-items:center;color:var(--ink-3);font-size:14px}
+.o-empty .num{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;border:1.5px dashed var(--line-2);font-family:var(--f-mono);font-size:13px}
+.o-pool .ob .plus{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--paper);color:var(--ink-2);font-size:18px;line-height:1}
+.ores{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ores li{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:11px 12px;font-size:15px}
+.ores li.ok{border-color:var(--good)} .ores li.no{border-color:var(--bad)}
+.ores .num{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--mark);color:var(--mark-ink);font-family:var(--f-mono);font-size:13px;font-weight:500}
+.ores .tx{flex:1;min-width:0}
+.ores .st{flex:none;margin-top:3px}
+.ores .ok-i{color:var(--good)} .ores .no-i{color:var(--bad)}
+.yourorder{font-size:13.5px;color:var(--ink-2)}
+
+/* feedback */
+.fb{display:flex;flex-direction:column;gap:12px;border-radius:16px;padding:14px;background:var(--card);border:1px solid var(--line);animation:pop .22s ease}
+@keyframes pop{from{transform:translateY(6px);opacity:.4}to{transform:none;opacity:1}}
+.fb-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px}
+.fb-h .ic{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;color:var(--card)}
+.fb.good .fb-h .ic{background:var(--good)} .fb.good .fb-h{color:var(--good)}
+.fb.bad .fb-h .ic{background:var(--bad)} .fb.bad .fb-h{color:var(--bad)}
+.fb-ans{font-size:17px;line-height:1.5}
+.fb-ans small{display:block;font-size:13px;color:var(--ink-2);margin-bottom:2px}
+.yours{font-size:14px;color:var(--ink-2)}
+.yours s{color:var(--bad)}
+.memo{display:flex;gap:10px;align-items:flex-start;background:var(--warn-bg);border-radius:12px;padding:12px;font-size:15px;line-height:1.45}
+.memo svg{flex:none;color:var(--warn);margin-top:2px}
+.memo-k{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);margin-bottom:3px}
+.override{align-self:flex-start;background:none;border:1px solid var(--line-2);border-radius:10px;padding:7px 11px;font-size:13.5px;color:var(--ink-2)}
+
+/* action bar */
+.spacer{flex:1}
+.abar{position:sticky;bottom:0;z-index:5;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:12px max(16px,env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--paper) 30%);display:flex;gap:8px;align-items:stretch}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:52px;border-radius:14px;padding:0 16px;font-weight:700;font-size:16px;border:1.5px solid var(--line-2);background:var(--card);color:var(--ink)}
+.btn.pri{flex:1;background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-size:17px}
+.btn.pri:disabled{opacity:.45}
+.btn.ghost{padding:0 12px;font-weight:600;font-size:14.5px;color:var(--ink-2);white-space:nowrap}
+.btn.ghost.on{border-color:var(--warn);color:var(--warn)}
+.btn:active:not(:disabled){transform:scale(.98)}
+
+/* results */
+.score{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.score .big{font-size:56px}
+.score .pct{font-family:var(--f-mono);font-size:14px;color:var(--ink-2)}
+.rlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rlist li{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14.5px}
+.rlist .st{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;color:var(--card);margin-top:1px}
+.rlist .st.ok{background:var(--good)} .rlist .st.no{background:var(--bad)}
+.rlist .tx{flex:1;min-width:0}
+.rlist .num{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+h2.sec{font-family:var(--f-display);font-weight:500;font-size:18px}
+.btnrow{display:flex;flex-direction:column;gap:8px}
+
+/* cheat sheet */
+.listhead{display:flex;flex-direction:column;gap:12px}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--line-2);border-radius:14px;padding:0 12px}
+.search svg{flex:none;color:var(--ink-3)}
+.search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:16px;padding:12px 0;color:var(--ink);outline:none}
+.search:focus-within{border-color:var(--accent)}
+.toggle{display:flex;align-items:center;gap:10px;font-size:14.5px;color:var(--ink-2)}
+.toggle input{width:20px;height:20px;accent-color:var(--accent)}
+.items{display:flex;flex-direction:column;gap:12px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.item .q{font-weight:600;line-height:1.4}
+.item .ans{font-size:16.5px;line-height:1.55}
+.pairs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.pairs li{display:flex;flex-direction:column;gap:3px;padding-left:12px;border-left:2px solid var(--line)}
+.pairs .pl{font-weight:600;font-size:15px}
+.pairs .pr{font-size:15px}
+.steps{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:6px;counter-reset:s}
+.steps li{display:flex;gap:9px;font-size:15px;line-height:1.4;counter-increment:s}
+.steps li::before{content:counter(s);flex:none;display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:var(--mark);color:var(--mark-ink);font-family:var(--f-mono);font-size:12px;font-weight:500;margin-top:-1px}
+.key{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.reveal{align-self:flex-start;border:1.5px dashed var(--line-2);background:var(--paper);border-radius:12px;padding:10px 14px;font-weight:600;color:var(--ink-2)}
+.lv{font-family:var(--f-mono);font-size:11px;padding:2px 7px;border-radius:99px;margin-left:auto}
+.lv.l-new{background:var(--paper);color:var(--ink-3)} .lv.l-bad{background:var(--bad-bg);color:var(--bad)} .lv.l-1{background:var(--warn-bg);color:var(--warn)} .lv.l-2{background:var(--good-bg);color:var(--good)} .lv.l-3{background:var(--good);color:var(--card)}
+.empty{padding:28px 8px;text-align:center;color:var(--ink-2)}
+.backrow{display:flex;align-items:center;gap:10px}
+.backrow h1{font-family:var(--f-display);font-size:22px;font-weight:700}
+@media (min-width:560px){.actions .act{min-height:104px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="app" class="wrap"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Content: 61 questions from the answer key ---------- */
+const TOPICS = {
+  crit:    {name:'Критическое мышление', full:'Основы системного и критического мышления'},
+  tools:   {name:'Цифровые инструменты', full:'Цифровая грамотность и инструменты командной работы'},
+  team:    {name:'Команда и лидерство',  full:'Цифровая грамотность и инструменты командной работы'},
+  metrics: {name:'Метрики продукта',     full:'Метрики продукта'}
+};
+
+const Q = [
+/* ---- Критическое мышление: термины ---- */
+{id:'1',t:'crit',k:'term',
+ q:'Метод построения матрицы структурных взаимосвязей между объектами, явлениями и концепциями для выявления всех возможных комбинаций и поиска новых решений – это…',
+ a:'Морфологический анализ',alt:['морфологический','морфологический метод'],
+ d:['Метод фокальных объектов','Контрольная таблица Алекса Осборна','Синектика','Т-схема','Ментальная карта'],
+ clue:'Вспомни разбор слова по составу на уроке русского: объект делят на части по строению и перебирают все сочетания.',
+ memo:'МАТРИЦА всех КОМБИНАЦИЙ = раскладываем объект по «строению», как слово при морфологическом разборе. Морфология — наука о строении, отсюда МОРФОЛОГИЧЕСКИЙ АНАЛИЗ.'},
+{id:'2',t:'crit',k:'term',
+ q:'Метод, при котором к исследуемому объекту присоединяются случайные свойства и признаки других объектов, что позволяет создавать новые модификации и идеи – это…',
+ a:'Метод фокальных объектов',alt:['фокальных объектов','мфо','метод фокальных','фокальный объект','метод фокального объекта'],
+ d:['Морфологический анализ','Синектика','Контрольная таблица Алекса Осборна','Мозговой штурм','Метод шести шляп'],
+ clue:'Наш объект стоит в центре внимания, «в фокусе», а к нему притягиваем признаки случайных предметов.',
+ memo:'Объект в ФОКУСЕ, и на него «наводим» случайные свойства: «пушистый стул», «поющий чайник». Это МЕТОД ФОКАЛЬНЫХ ОБЪЕКТОВ.'},
+{id:'3',t:'crit',k:'term',
+ q:'Инструмент визуализации, где в левой колонке фиксируются аргументы «за», в правой – «против», что позволяет наглядно сопоставить доводы и сделать взвешенный вывод – это…',
+ a:'Т-схема',alt:['т схема','t схема','тсхема','t-схема'],
+ d:['Диаграмма Исикавы','SWOT-анализ','Ментальная карта','Морфологический анализ','Матрица Эйзенхауэра'],
+ clue:'Нарисуй две колонки с общим заголовком сверху. На какую букву это похоже?',
+ memo:'Черта сверху и черта посередине дают букву Т. Слева «за», справа «против»: Т-СХЕМА.'},
+{id:'4',t:'crit',k:'term',
+ q:'Список вопросов-провокаций (заменить, скомбинировать, увеличить, уменьшить, исключить, изменить на противоположное и др.) для генерации новых идей – это…',
+ a:'Контрольная таблица Алекса Осборна',alt:['контрольная таблица осборна','таблица осборна','таблица алекса осборна','контрольный список осборна','контрольные вопросы осборна','контрольный лист осборна'],
+ d:['Морфологический анализ','Метод фокальных объектов','Мозговой штурм','Метод шести шляп','Т-схема'],
+ clue:'Автор тот же, кто придумал мозговой штурм. Ответ: «контрольная таблица» плюс его имя.',
+ memo:'Алекс Осборн придумал мозговой штурм, а его КОНТРОЛЬНАЯ ТАБЛИЦА — это чек-лист глаголов: замени, объедини, увеличь, уменьши, переверни. «ОСборн ОСпаривает всё вопросами».'},
+
+/* ---- Цифровые инструменты: термины ---- */
+{id:'5',t:'tools',k:'term',
+ q:'Взаимосвязанный набор сервисов (таск-трекер, база знаний, мессенджер, платформа автоматизации), которые обмениваются данными и покрывают все потребности команды – это…',
+ a:'Экосистема цифровых инструментов',alt:['экосистема инструментов','экосистема цифровых сервисов'],
+ d:['Единая экосистема','Облачное хранилище данных','Платформа автоматизации','База знаний'],
+ clue:'В вопросе перечислены сервисы-инструменты. Ответ из трёх слов и начинается с «Экосистема…».',
+ memo:'Перечислены ИНСТРУМЕНТЫ (трекер, база знаний, мессенджер), значит ЭКОСИСТЕМА ЦИФРОВЫХ ИНСТРУМЕНТОВ. Не путай с №6: там «единый источник правды» и ответ «единая экосистема».'},
+{id:'6',t:'tools',k:'term',
+ q:'Что решает проблему устранения потерь информации и необходимости ручного переноса данных между сервисами, обеспечивая единый источник правды?',
+ a:'Единая экосистема',alt:[],
+ d:['Экосистема цифровых инструментов','Облачное хранилище данных','Очистка данных','Автоматический сбор через таск-трекеры'],
+ clue:'Главное слово в вопросе: «ЕДИНЫЙ источник правды».',
+ memo:'ЕДИНЫЙ источник правды, значит ЕДИНАЯ ЭКОСИСТЕМА. Слово повторяется: единый → единая.'},
+{id:'7',t:'tools',k:'term',
+ q:'Назовите ключевое преимущество использования облачных сервисов?',
+ a:'Доступность',alt:['доступ','доступ из любого места','доступ с любого устройства'],
+ d:['Безопасность','Низкая стоимость','Конфиденциальность','Работа без интернета'],
+ clue:'Облако «висит» над всеми сразу: где бы ты ни был, до него можно дотянуться.',
+ memo:'Облако видно отовсюду: зашёл с телефона, с ноутбука, из любого города. Это ДОСТУПНОСТЬ.'},
+{id:'8',t:'tools',k:'term',
+ q:'Какой метод сбора данных о работе команды является наиболее объективным?',
+ a:'Автоматический сбор через таск-трекеры',alt:['автоматический сбор','автоматический сбор данных','через таск трекеры','автоматический сбор через трекеры','автоматический сбор данных через таск трекеры'],
+ d:['Анкетирование сотрудников','Самоотчёты участников команды','Наблюдение руководителя','Интервью с командой'],
+ clue:'Объективно значит без человеческого фактора. Кто не умеет приукрашивать?',
+ memo:'Человек приукрасит, программа нет. ОБЪЕКТИВНО = АВТОМАТИЧЕСКИ: данные сами пишутся в ТАСК-ТРЕКЕР.'},
+{id:'9',t:'tools',k:'term',
+ q:'Процесс удаления дубликатов, исправления ошибок и заполнения пропусков в данных, необходимый для получения достоверных результатов анализа – это…',
+ a:'Очистка данных',alt:['очистка','чистка данных','data cleaning'],
+ d:['Агрегация данных','Визуализация данных','Сегментация данных','Архивация данных'],
+ clue:'Дубли, ошибки и пропуски — это «грязь» в таблице. Что делают с грязью?',
+ memo:'Дубликаты, ошибки, пропуски — мусор в данных. Как уборка перед гостями: ОЧИСТКА ДАННЫХ.'},
+{id:'10',t:'tools',k:'term',
+ q:'Какой тип визуализации лучше всего подходит для отображения прогресса команды в течение спринта?',
+ a:'Диаграмма сгорания задач',alt:['диаграмма сгорания','burndown','burndown chart','бёрндаун','берндаун','график сгорания задач','график сгорания'],
+ d:['Диаграмма Ганта','Тепловая карта','Круговая диаграмма','Воронкообразная диаграмма'],
+ clue:'Спринт — это забег. Что происходит с калориями во время забега?',
+ memo:'СПРИНТ = забег, задачи «сгорают» как калории: линия ползёт вниз до нуля к концу спринта. ДИАГРАММА СГОРАНИЯ ЗАДАЧ (burndown).'},
+{id:'11',t:'tools',k:'term',
+ q:'Серверные мощности, предоставляемые через интернет для хранения и обработки данных – это…',
+ a:'Облачное хранилище данных',alt:['облачное хранилище','облако','облачное хранение данных'],
+ d:['Локальный сервер','База знаний','Единая экосистема','Внешний накопитель'],
+ clue:'«Через интернет» — значит где-то наверху. «Для хранения» — значит…',
+ memo:'Через интернет = в ОБЛАКЕ, для хранения = ХРАНИЛИЩЕ. Вместе: ОБЛАЧНОЕ ХРАНИЛИЩЕ ДАННЫХ.'},
+{id:'12',t:'tools',k:'term',
+ q:'Что используется в дашбордах, чтобы дать пользователю возможность интерактивно изучать данные с разных ракурсов, например, увидеть задачи только конкретного исполнителя или только за определённый период?',
+ a:'Фильтры',alt:['фильтр','фильтрация'],
+ d:['Виджеты','Права доступа','Тепловые карты','Автоматическая рассылка'],
+ clue:'В вопросе дважды стоит слово «ТОЛЬКО». Что оставляет только нужное?',
+ memo:'«ТОЛЬКО этого исполнителя», «ТОЛЬКО за период» — отсекаем лишнее, как на маркетплейсе. ФИЛЬТРЫ.'},
+
+/* ---- Команда и лидерство: термины ---- */
+{id:'13',t:'team',k:'term',
+ q:'Умение понимать чувства и эмоции окружающих, проявляя искреннюю заботу и интерес к их проблемам – это…',
+ a:'Эмпатия',alt:['сопереживание'],
+ d:['Харизма','Мотивация','Командное взаимодействие','Этические нормы','Стрессоустойчивость'],
+ clue:'Греческое слово, означает «чувствую вместе с тобой». Начинается на ту же букву, что и «эмоции».',
+ memo:'ЧУВСТВА и ЭМОЦИИ других → ЭМПАТИЯ (греч. pathos — чувство). ЭМоции ↔ ЭМпатия.'},
+{id:'14',t:'team',k:'term',
+ q:'Честность, ответственность, добросовестность, гуманность – это…',
+ a:'Этические нормы',alt:['этика','нормы этики','этические принципы'],
+ d:['Лидерство','Харизма','Эмпатия','Командное взаимодействие'],
+ clue:'Это не навык, а набор моральных правил. Как называется наука о морали?',
+ memo:'Список добродетелей — это не умение, а ПРАВИЛА морали. Наука о морали — этика, правила — нормы: ЭТИЧЕСКИЕ НОРМЫ.'},
+{id:'15',t:'team',k:'term',
+ q:'Умение вдохновлять команду, распределять задачи и брать ответственность за общий результат — это…',
+ a:'Лидерство',alt:[],
+ d:['Делегирование','Мотивация','Координация','Харизма','Стратегическое видение'],
+ clue:'Всё сразу: вдохновить, распределить и ответить за итог. Кто так делает?',
+ memo:'Три в одном: вдохновить + распределить + ОТВЕТИТЬ за общий результат. Это делает лидер: ЛИДЕРСТВО. Если только «распределять роли по сильным сторонам», то это №19, делегирование.'},
+{id:'16',t:'team',k:'term',
+ q:'Способность выстраивать доверительные отношения в коллективе, основанные на уважении, открытости и поддержке — это…',
+ a:'Командное взаимодействие',alt:[],
+ d:['Координация','Эмпатия','Управление конфликтами','Лидерство'],
+ clue:'Речь про отношения между людьми в коллективе. Два слова, первое — «командное».',
+ memo:'Доверие, уважение, поддержка — то, как люди ВЗАИМОДЕЙСТВУЮТ в КОМАНДЕ. КОМАНДНОЕ ВЗАИМОДЕЙСТВИЕ.'},
+{id:'17',t:'team',k:'term',
+ q:'Умение согласовывать действия участников команды и организовывать их работу для достижения общей цели — это…',
+ a:'Координация',alt:[],
+ d:['Делегирование','Командное взаимодействие','Стратегическое видение','Лидерство'],
+ clue:'СОГЛАСОВЫВАТЬ действия = приводить в порядок вместе. Латинское «со-» + «порядок».',
+ memo:'СОГЛАСОВАТЬ действия = КО-ОРДИНАЦИЯ (co — вместе, ordo — порядок). Координатор следит, чтобы все шли в ногу.'},
+{id:'18',t:'team',k:'term',
+ q:'Навык мотивировать сотрудников на достижение высоких результатов и поддерживать их инициативу — это…',
+ a:'Мотивация',alt:['мотивирование'],
+ d:['Харизма','Лидерство','Делегирование','Эмпатия'],
+ clue:'Ответ спрятан прямо в тексте вопроса.',
+ memo:'В вопросе написано «МОТИВИРОВАТЬ», значит ответ МОТИВАЦИЯ. Самый лёгкий балл.'},
+{id:'19',t:'team',k:'term',
+ q:'Способность распределять роли в команде с учётом сильных сторон каждого участника — это…',
+ a:'Делегирование',alt:['делегирование полномочий','делегирование задач'],
+ d:['Координация','Лидерство','Мотивация','Стратегическое видение'],
+ clue:'Отдать задачу тому, кто сделает её лучше. Как называют человека, которому поручили дело?',
+ memo:'РАСПРЕДЕЛЯЮ роли по сильным сторонам = передаю задачи другим. Делегат — тот, кому поручили: ДЕЛЕГИРОВАНИЕ.'},
+{id:'20',t:'team',k:'term',
+ q:'Качество, позволяющее сохранять спокойствие и конструктивность при управлении коллективом — это…',
+ a:'Стрессоустойчивость',alt:['устойчивость к стрессу','стресоустойчивость'],
+ d:['Эмпатия','Харизма','Управление конфликтами','Этические нормы'],
+ clue:'Сохранять спокойствие, когда всё горит. Устойчивость к чему?',
+ memo:'СПОКОЙСТВИЕ под давлением = не ломаешься от стресса. СТРЕССОУСТОЙЧИВОСТЬ.'},
+{id:'21',t:'team',k:'term',
+ q:'Навык формировать единое направление работы команды и удерживать её фокус на цели — это…',
+ a:'Стратегическое видение',alt:[],
+ d:['Координация','Лидерство','Делегирование','Мотивация'],
+ clue:'Направление и цель где-то вдали. Нужно хорошо ВИДЕТЬ далеко вперёд.',
+ memo:'НАПРАВЛЕНИЕ и ЦЕЛЬ = смотришь далеко вперёд, как стратег над картой. СТРАТЕГИЧЕСКОЕ ВИДЕНИЕ.'},
+{id:'21а',t:'team',k:'term',
+ q:'Способность предупреждать и конструктивно разрешать противоречия в коллективе — это…',
+ a:'Управление конфликтами',alt:['управление конфликтом','разрешение конфликтов','конфликт менеджмент'],
+ d:['Командное взаимодействие','Эмпатия','Стрессоустойчивость','Координация'],
+ clue:'Каким другим словом называют «противоречия в коллективе»?',
+ memo:'ПРОТИВОРЕЧИЯ = КОНФЛИКТЫ; предупреждать и разрешать = управлять. УПРАВЛЕНИЕ КОНФЛИКТАМИ. (В ключе у этого вопроса нет номера, он стоит между 21 и 22.)'},
+{id:'22',t:'team',k:'term',
+ q:'Участник команды, который поддерживает благоприятный психологический климат, — это…',
+ a:'Медиатор',alt:[],
+ d:['Неформальный лидер','Демократический лидер','Авторитарный лидер','Координатор'],
+ clue:'Посредник-миротворец. Так же называют пластинку, которой играют на гитаре.',
+ memo:'МЕДИАТОР — посредник и миротворец, держит в команде хорошую атмосферу. Как гитарный медиатор: без него струны звучат грубо.'},
+{id:'23',t:'team',k:'term',
+ q:'Участник, который обладает высоким уровнем доверия со стороны группы и влияет на её мнение, — это…',
+ a:'Неформальный лидер',alt:[],
+ d:['Медиатор','Демократический лидер','Авторитарный лидер','Формальный лидер'],
+ clue:'Должности нет, но его слушают. Лидер без «формы».',
+ memo:'Влияет через ДОВЕРИЕ группы, а не через приказ и должность. Лидер без формы: НЕФОРМАЛЬНЫЙ ЛИДЕР.'},
+{id:'24',t:'team',k:'term',
+ q:'Лидер, который делает акцент на контроле, правилах и выполнении поставленных задач, — это…',
+ a:'Авторитарный лидер',alt:['авторитарный'],
+ d:['Демократический лидер','Неформальный лидер','Либеральный лидер','Медиатор'],
+ clue:'Контроль, правила, «я сказал — вы сделали». Стиль командира в армии.',
+ memo:'КОНТРОЛЬ + ПРАВИЛА + выполнение = командир в армии. АВТОРИТАРНЫЙ ЛИДЕР: «А» как «Армия».'},
+{id:'25',t:'team',k:'term',
+ q:'Вид лидера, который позволяет участникам самостоятельно принимать решения и выбирать способы работы, — это…',
+ a:'Демократический лидер',alt:['демократический'],
+ d:['Авторитарный лидер','Неформальный лидер','Медиатор','Формальный лидер'],
+ clue:'Решает не один человек, а вся команда. Как называется власть народа?',
+ memo:'Участники РЕШАЮТ САМИ = власть у команды, как в демократии. ДЕМОКРАТИЧЕСКИЙ ЛИДЕР.'},
+{id:'26',t:'team',k:'term',
+ q:'Совокупность личного обаяния, уверенности и авторитета, вызывающая у членов команды безусловное доверие к лидеру — это…',
+ a:'Харизма',alt:[],
+ d:['Лидерство','Эмпатия','Мотивация','Этические нормы'],
+ clue:'Обаяние, которое притягивает людей. Греческое слово «дар».',
+ memo:'ОБАЯНИЕ + уверенность + авторитет = магнетизм личности. ХАРИЗМА (греч. «дар»).'},
+
+/* ---- Метрики продукта: термины ---- */
+{id:'27',t:'metrics',k:'term',
+ q:'Как влияние акций и скидок отражается в расчете жизненного цикла клиента для новых пользователей?',
+ a:'Корректировка выручки',alt:['скорректировать выручку','корректировка дохода'],
+ d:['Сегментация когорт','Корректировка стоимости привлечения','Точка безубыточности','Монетизация'],
+ clue:'Скидка = клиент платит меньше. Какую цифру в LTV тогда нужно поправить?',
+ memo:'Акции и скидки «съедают» деньги новичков, поэтому выручку в LTV надо ПОПРАВИТЬ. КОРРЕКТИРОВКА ВЫРУЧКИ.'},
+{id:'28',t:'metrics',k:'term',
+ q:'Какой инструмент визуализации наиболее эффективен для презентации результатов когортного анализа?',
+ a:'Тепловая карта',alt:['heatmap','хитмап','тепловая диаграмма'],
+ d:['Воронкообразная диаграмма','Круговая диаграмма','Диаграмма сгорания задач','Гистограмма'],
+ clue:'Когортную таблицу раскрашивают цветом: где «горячо», а где «холодно».',
+ memo:'Когорты — это таблица «месяц × месяц», раскрашенная от яркого к бледному: горячо/холодно. ТЕПЛОВАЯ КАРТА.'},
+{id:'29',t:'metrics',k:'term',
+ q:'Какой графический элемент обязателен на дашборде для мониторинга воронки активации?',
+ a:'Воронкообразная диаграмма',alt:['воронка','диаграмма воронки','воронкообразный график','воронка конверсии','воронкообразная'],
+ d:['Тепловая карта','Круговая диаграмма','Диаграмма сгорания задач','Гистограмма'],
+ clue:'Ответ подсказан словом в самом вопросе.',
+ memo:'В вопросе слово ВОРОНКА активации, значит ВОРОНКООБРАЗНАЯ ДИАГРАММА. Воронка ↔ воронка.'},
+{id:'30',t:'metrics',k:'term',
+ q:'Что использовать в расчете юнит-экономики, чтобы учесть разную прибыльность клиентов внутри одной группы при прогнозе доходов?',
+ a:'Сегментация когорт',alt:['сегментация когорты','сегментирование когорт'],
+ d:['Сегментация трафика','Корректировка выручки','Точка безубыточности','Прогнозная модель'],
+ clue:'Группа клиентов = когорта. Внутри неё все разные, значит её надо разделить на…',
+ memo:'Группа = КОГОРТА; внутри разная прибыльность, поэтому режем когорту на части: СЕГМЕНТАЦИЯ КОГОРТ. Не путай с №36: посетители сайта → сегментация ТРАФИКА.'},
+{id:'31',t:'metrics',k:'term',
+ q:'Минимальный объём продаж, при котором компания не получает убыток, — это…',
+ a:'Точка безубыточности',alt:['безубыточность','порог рентабельности'],
+ d:['Валовая прибыль','Срок окупаемости','Оборачиваемость капитала','Маржинальность'],
+ clue:'«Не получает УБЫТОК» — сожми в одно слово.',
+ memo:'НЕ получает УБЫТОК = БЕЗ-УБЫТОЧНОСТЬ. ТОЧКА БЕЗУБЫТОЧНОСТИ: ответ — это сам вопрос, собранный в одно слово.'},
+{id:'32',t:'metrics',k:'term',
+ q:'Разница между выручкой и переменными затратами — это…',
+ a:'Валовая прибыль',alt:[],
+ d:['Чистая прибыль','Точка безубыточности','Выручка','Оборачиваемость капитала'],
+ clue:'Первая прибыль, ещё «валом», до всех остальных вычетов.',
+ memo:'Выручка минус переменные — первая, «валовая» прибыль, пока ещё «оптом, валом». В ключе именно ВАЛОВАЯ ПРИБЫЛЬ (не чистая и не маржинальная).'},
+{id:'33',t:'metrics',k:'term',
+ q:'Какой показатель использовать для оценки эффективности работы с дебиторской задолженностью?',
+ a:'Оборачиваемость капитала',alt:['оборачиваемость','оборачиваемость дебиторской задолженности'],
+ d:['Валовая прибыль','Точка безубыточности','Рентабельность продаж','Монетизация'],
+ clue:'Дебиторка — деньги, которые клиенты ещё не вернули. Важно, как быстро они возвращаются по кругу.',
+ memo:'Деньги ушли клиентам в долг и должны ОБЕРНУТЬСЯ назад: чем быстрее круг, тем лучше. ОБОРАЧИВАЕМОСТЬ КАПИТАЛА.'},
+{id:'34',t:'metrics',k:'term',
+ q:'Какой метод применить для генерации нестандартных бизнес-решений в команде?',
+ a:'Мозговой штурм',alt:['брейншторм','брейнсторм','брейнсторминг','мозговая атака','brainstorm','brainstorming'],
+ d:['Т-схема','SWOT-анализ','Прогнозная модель','Когортный анализ'],
+ clue:'Вся команда разом «атакует» задачу головами.',
+ memo:'НЕСТАНДАРТНЫЕ идеи + В КОМАНДЕ = все разом штурмуют задачу мозгами. МОЗГОВОЙ ШТУРМ.'},
+{id:'35',t:'metrics',k:'term',
+ q:'Что называют превращением пользовательской активности в доход?',
+ a:'Монетизация',alt:[],
+ d:['Конверсия','Сегментация трафика','Удержание','Валовая прибыль'],
+ clue:'Активность превращаем в… монеты.',
+ memo:'Активность → ДОХОД = превращаем клики в МОНЕТЫ. МОНЕТИЗАЦИЯ.'},
+{id:'36',t:'metrics',k:'term',
+ q:'Что помогает разделить посетителей сайта на группы по источникам, интересам и активности?',
+ a:'Сегментация трафика',alt:['сегментирование трафика'],
+ d:['Сегментация когорт','Прогнозная модель','Воронкообразная диаграмма','Тепловая карта'],
+ clue:'Посетители сайта — это трафик. Разделить на группы — это…',
+ memo:'Посетители САЙТА = ТРАФИК, разделить на группы = СЕГМЕНТИРОВАТЬ. СЕГМЕНТАЦИЯ ТРАФИКА.'},
+{id:'37',t:'metrics',k:'term',
+ q:'Что позволяет заранее оценить будущий спрос на продукт на основе прошлых данных?',
+ a:'Прогнозная модель',alt:['модель прогнозирования','прогностическая модель','предиктивная модель'],
+ d:['Сегментация трафика','Когортный анализ','Тепловая карта','Точка безубыточности'],
+ clue:'Как синоптик по прошлым данным предсказывает погоду.',
+ memo:'ЗАРАНЕЕ оценить будущее по прошлому — как прогноз погоды. ПРОГНОЗНАЯ МОДЕЛЬ.'},
+
+/* ---- Соответствия ---- */
+{id:'38',t:'crit',k:'match',
+ q:'Установите соответствие между когнитивным искажением и его проявлением в рабочей ситуации',
+ clue:'Ищи одинаковые корни: «подтверждения» ↔ «подтверждающие», «выжившие» ↔ «успешные».',
+ pairs:[
+  ['Ошибка подтверждения','Аналитик ищет в отчётах только цифры, подтверждающие его гипотезу','ПОДТВЕРЖДЕНИЯ ↔ ПОДТВЕРЖДАЮЩИЕ: одно и то же слово.'],
+  ['Эффект якоря','Первая озвученная цифра бюджета становится основой для всех дальнейших обсуждений','Якорь бросают ПЕРВЫМ, и корабль больше не сдвинется: первая цифра держит весь разговор.'],
+  ['Ошибка выжившего','Менеджер опирается на истории успеха известных компаний, игнорируя статистику провалов','Выжившие — успешные компании. Провалившихся просто не видно.']]},
+{id:'39',t:'crit',k:'match',
+ q:'Установите соответствие между типом системной петли обратной связи и примером из ИТ-проекта',
+ clue:'Сигналы: «ещё больше» — усиление, «снижает» — баланс, «через несколько месяцев» — задержка.',
+ pairs:[
+  ['Усиливающая петля (положительная)','Чем больше пользователей подключается к платформе, тем ценнее она становится, что привлекает ещё больше пользователей','Снежный ком: «больше → ещё больше». Рост сам себя УСИЛИВАЕТ.'],
+  ['Балансирующая петля (отрицательная)','Чем больше багов находят тестировщики, тем больше времени у разработчиков на их исправление, что снижает количество новых багов','Как термостат: чем больше багов, тем сильнее их гасят, и система возвращается в равновесие.'],
+  ['Петля с задержкой','Увеличение найма разработчиков приводит к росту коммуникационных издержек, но эффект заметен только через несколько месяцев','«Только через несколько месяцев» = ЗАДЕРЖКА.']]},
+{id:'40',t:'crit',k:'match',
+ q:'Установите соответствие между критерием критического мышления (модель ГЛОБУС) и его характеристикой',
+ clue:'Слушай корень слова: гибкий меняется, основа — это факты, «сам» — своя позиция.',
+ pairs:[
+  ['Гибкость','Умение менять точку зрения при появлении новых фактов','Гибкий гнётся: меняет позицию, когда появились новые факты.'],
+  ['Обоснованность','Наличие доказательств и фактов, подтверждающих выводы','ОСНОВА вывода — доказательства и факты.'],
+  ['Самостоятельность','Способность формировать собственную позицию, а не повторять чужие мнения','САМ думаю, не повторяю за другими.']]},
+{id:'41',t:'crit',k:'match',
+ q:'Установите соответствие между этапом критического анализа информации и выполняемым действием',
+ clue:'Источник — это про автора, допущения — про «без доказательств», репрезентативность — про выборку.',
+ pairs:[
+  ['Оценка достоверности источника','Анализ компетентности автора и возможной ангажированности','Источник = автор. Проверяем, разбирается ли он и не «купленный» ли.'],
+  ['Выявление скрытых допущений','Поиск утверждений, которые автор принимает как данность без доказательств','Допущение — «допустим, это так» без доказательств. Скрытое — автор не говорит об этом прямо.'],
+  ['Проверка репрезентативности данных','Определение того, насколько выборка соответствует генеральной совокупности','Репрезентативный = «представительный»: выборка хорошо представляет всю совокупность.']]},
+{id:'42',t:'tools',k:'match',
+ q:'Соотнесите тип цифрового инструмента с его основным назначением в экосистеме команды',
+ clue:'Название инструмента подсказывает назначение: задачи, знания, автоматизация.',
+ pairs:[
+  ['Таск-трекер','Управление задачами и потоком работ','Task — задача. Трекер задач управляет задачами.'],
+  ['База знаний','Хранение и структурирование документации','Знания хранят в документах, как в библиотеке.'],
+  ['Платформа с минимальным кодированием','Автоматизация связей между сервисами','Low-code (вроде Zapier или Make) склеивает сервисы без программиста. Это автоматизация.']]},
+{id:'43',t:'tools',k:'match',
+ q:'Соотнесите термин из области ИИ с его определением',
+ clue:'Промпт ты пишешь сам, токен — самый мелкий кусочек, галлюцинация — «привиделось».',
+ pairs:[
+  ['Промпт','Запрос или инструкция, передаваемая нейросети','Prompt — подсказка суфлёра: то, что ты говоришь модели.'],
+  ['Токен','Единица текста, которую обрабатывает модель (часть слова или символ)','Токен — как жетон в метро: маленькая единица. Модель читает текст кусочками.'],
+  ['Галлюцинация','Генерация моделью фактологически неверной, но правдоподобной информации','Модели «привиделось»: звучит убедительно, но это неправда.']]},
+{id:'44',t:'metrics',k:'match',
+ q:'Соотнесите изменение метрики с его наиболее вероятным влиянием на экономику продукта (при прочих равных условиях)',
+ clue:'Посчитай: конверсия 3% → 3,3% — это +10%; отток 5% → 4% даёт LTV +25%.',
+ pairs:[
+  ['Рост стоимости привлечения клиента на 20%','Увеличение срока окупаемости затрат на привлечение клиента','Привлекать стало дороже — дольше ждать, пока клиент окупится.'],
+  ['Снижение коэффициента оттока с 5% до 4%','Увеличение пожизненной ценности клиента на 25% при неизменной маржинальности','LTV ≈ 1 / отток: 1/0,04 = 25 против 1/0,05 = 20, то есть +25%. Меньше уходят — дольше платят.'],
+  ['Рост коэффициента конверсии с 3% до 3,3%','Рост выручки на 10% при том же трафике','3,3 / 3 = 1,1: на 10% больше покупателей с того же трафика, значит +10% выручки.']]},
+{id:'45',t:'metrics',k:'match',
+ q:'Соотнесите бизнес-гипотезу с метрикой, которая наиболее релевантна для её проверки',
+ clue:'Ключевые слова гипотезы и метрики совпадают.',
+ pairs:[
+  ['«Упрощение формы регистрации увеличит количество завершённых регистраций»','Коэффициент активации (конверсия на этапе регистрации)','РЕГИСТРАЦИЯ ↔ конверсия на этапе РЕГИСТРАЦИИ.'],
+  ['«Персонализированные рекомендации увеличат частоту покупок»','Частота покупок / коэффициент удержания','ЧАСТОТА покупок ↔ ЧАСТОТА покупок: слово в слово.'],
+  ['«Изменение алгоритма рекомендаций увеличит количество просмотренных товаров за сессию»','Глубина просмотра','Сколько товаров посмотрел за сессию = насколько «глубоко» зашёл. Глубина просмотра.']]},
+{id:'46',t:'metrics',k:'match',
+ q:'Соотнесите сценарий развития продукта с наиболее вероятным паттерном поведения когорт по данным когортного анализа коэффициента удержания',
+ clue:'Сезон — всплески, «надоедает» — обвал, сильный продукт — плато.',
+ pairs:[
+  ['Продукт с сильным соответствием рынку и высоким виральным эффектом','Стабильно высокий коэффициент удержания с плавным снижением и выходом на плато на уровне 40–50%','Продукт нужен рынку, люди остаются: кривая выходит на ПЛАТО.'],
+  ['Продукт с сезонным спросом, например, сервис по покупке билетов на летние фестивали','Всплеск коэффициента удержания в определённые месяцы года, соответствующие сезону, и провалы в межсезонье','Сезон — всплеск, межсезонье — провал.'],
+  ['Продукт, который надоедает после первого использования','Высокий коэффициент удержания в первом месяце, резкое падение во втором, практически нулевое удержание в третьем','Надоел: попробовал, бросил, к третьему месяцу никого.']]},
+{id:'47',t:'metrics',k:'match',
+ q:'Соотнесите показатель из отчёта о прибылях и убытках с метрикой продукта, которая на него непосредственно влияет',
+ clue:'Прибыль — там, где «минус»; расходы — там, где «привлечение»; выручка — простое умножение.',
+ pairs:[
+  ['Валовая прибыль','Средняя выручка на пользователя минус переменные расходы на пользователя, умноженные на количество пользователей','ПРИБЫЛЬ = выручка МИНУС расходы. Ищи слово «минус».'],
+  ['Коммерческие расходы','Стоимость привлечения клиента в абсолютном выражении, умноженная на количество новых клиентов','Коммерческие расходы — деньги на маркетинг, то есть на ПРИВЛЕЧЕНИЕ клиентов (CAC × новые клиенты).'],
+  ['Выручка','Количество платящих клиентов × средняя выручка на одного платящего пользователя','Выручка = сколько платящих × сколько платит каждый. Без вычитаний.']]},
+{id:'48',t:'metrics',k:'match',
+ q:'Соотнесите проблему, выявленную в продуктовых метриках, с наиболее адекватным предложением по повышению эффективности',
+ clue:'Каждое решение лечит своё место: рекламу, первые шаги или повторные покупки.',
+ pairs:[
+  ['Высокая стоимость привлечения клиента при низкой конверсии из пробного периода в платящих пользователей','Оптимизация рекламных каналов (отказ от нецелевого трафика) и доработка пути пользователя внутри пробного периода','Дорогое ПРИВЛЕЧЕНИЕ — чиним РЕКЛАМУ; плохой ПРОБНЫЙ период — чиним путь в пробном периоде.'],
+  ['Низкий коэффициент удержания при высоком начальном интересе','Улучшение процесса адаптации новых пользователей и демонстрация ценности продукта на первых этапах использования','Пришли с интересом, но ушли — не поняли ценность. Улучшаем адаптацию (онбординг).'],
+  ['Низкая частота покупок у существующих клиентов','Внедрение программы лояльности, кэшбэка или персональных скидок для повторных покупок','Редко покупают СНОВА — лояльность, кэшбэк, скидки на ПОВТОРНЫЕ покупки.']]},
+{id:'49',t:'metrics',k:'match',
+ q:'Соотнесите бизнес-задачу по мониторингу эффективности с наиболее подходящим инструментом веб-аналитики для её решения',
+ clue:'Клики — тепловые карты; «кросс-девайс» — «кросс-платформенный»; сервер — производительность.',
+ pairs:[
+  ['Необходимо отследить, на какие элементы интерфейса пользователи кликают чаще всего, и выявить проблемы с навигацией','Сервис веб-аналитики с записью действий пользователей и тепловыми картами','КЛИКИ → тепловая карта кликов и запись сессий (вебвизор).'],
+  ['Требуется построить сложную пользовательскую воронку с учётом кросс-девайсных переходов и импортировать данные о расходах из рекламных кабинетов','Система аналитики с кросс-платформенным трекингом','КРОСС-девайсные переходы ↔ КРОСС-платформенная система: «кросс» = «кросс». (В ключе фраза обрывается на «с кросс-платформенным…».)'],
+  ['Нужно в реальном времени отслеживать стабильность работы сервера и скорость загрузки страниц при проведении А/Б теста','Инструменты мониторинга производительности','Сервер и скорость загрузки = ПРОИЗВОДИТЕЛЬНОСТЬ.']]},
+{id:'50',t:'metrics',k:'match',
+ q:'Найдите соответствие между данными анализа групп пользователей и бизнес-предположениями',
+ clue:'«После месяца» ↔ «через 30 дней»; «соцсети против поиска» ↔ «бюджет на канал».',
+ pairs:[
+  ['Удержание новых групп за последние три месяца стабильно ниже, чем у предыдущих','Гипотеза: качество трафика ухудшилось (каналы привлечения стали приводить менее мотивированную аудиторию) либо изменился онбординг новых пользователей','НОВЫЕ группы хуже старых — что-то поменялось на входе: трафик или онбординг.'],
+  ['Удержание резко снижается после месяца использования (с 40% до 15%)','Гипотеза: через 30 дней у пользователей заканчивается бесплатный контент/пробный период, и они не видят ценности в переходе на платный тариф','ПОСЛЕ МЕСЯЦА = через 30 дней кончился пробный период.'],
+  ['Удержание аудитории из соцсетей на 20% выше, чем из поиска, при равных затратах','Гипотеза: необходимо перераспределить маркетинговый бюджет в пользу канала, который приводит более лояльных пользователей','Один канал лучше при тех же деньгах — переложить БЮДЖЕТ туда.']]},
+
+/* ---- Последовательности ---- */
+{id:'51',t:'tools',k:'order',key:'2, 4, 3, 1, 5',
+ q:'Установите правильную последовательность шагов при настройке автоматизации для обработки заявок клиентов',
+ steps:['Настроить триггер на получение нового сообщения в боте','Извлечь данные из сообщения','Добавить условие для проверки приоритета заявки','Создать задачу с полученными данными','Запустить сценарий и протестировать ошибки'],
+ clue:'Сценарий всегда начинается с события, которое его запускает, а заканчивается тестом.',
+ memo:'Как любой сценарий в Make или Zapier: СОБЫТИЕ → ДАННЫЕ → УСЛОВИЕ → ДЕЙСТВИЕ → ТЕСТ. По первым буквам: «Тигр Ищет Утку, Зайца — Тоже» (Триггер, Извлечь, Условие, Задача, Тест).'},
+{id:'52',t:'tools',k:'order',key:'2, 3, 1, 5, 4',
+ q:'Определите последовательность действий при создании информативного дашборда для отслеживания эффективности команды',
+ steps:['Определить ключевые метрики, которые нужно отслеживать','Создать фильтры, которые будут источником данных для виджетов','Добавить на дашборд виджеты','Расположить виджеты на дашборде для удобства восприятия','Настроить права доступа к дашборду для заинтересованных лиц'],
+ clue:'Сначала решаем, ЧТО отслеживать. Доступ даём, когда всё уже готово.',
+ memo:'ЧТО считаем → ОТКУДА данные → ЧЕМ показываем → КАК расставить → КОМУ показать. «Мама Фильтрует Воду, Ребёнок Доволен» (Метрики, Фильтры, Виджеты, Расположить, Доступ).'},
+{id:'53',t:'tools',k:'order',key:'2, 5, 3, 1, 4',
+ q:'Установите последовательность этапов применения ИИ для ускорения подготовки аналитического отчёта на основе данных',
+ steps:['Выгрузить сырые данные по завершённым задачам спринта','Подготовить сводную таблицу с ключевыми метриками','Составить промпт с описанием формата отчёта и целевой аудитории','Сгенерировать структурированный текст отчёта с помощью ИИ на основе выгруженных данных','Проверить сгенерированный текст и скорректировать фактические ошибки'],
+ clue:'Сначала данные, потом промпт, потом ИИ, а в конце проверка на галлюцинации.',
+ memo:'Как готовка: достал продукты, нарезал, написал рецепт, приготовил, попробовал. «Вася Сварил Пельмени, Гости Пробуют» (Выгрузить, Сводная, Промпт, Генерация, Проверка).'},
+{id:'54',t:'tools',k:'order',key:'2, 1, 4, 5, 3',
+ q:'Установите последовательность действий при настройке отчёта для руководства по метрикам команды',
+ steps:['Определить, какие метрики важны для руководства','Создать фильтр для отбора задач за текущий квартал','Выбрать тип визуализации для каждой метрики','Добавить созданный фильтр в гаджет на дашборде и настроить его отображение','Настроить автоматическую рассылку отчёта'],
+ clue:'Начало как в задании про дашборд: метрики → фильтр… Рассылка в самом конце.',
+ memo:'Похоже на №52, но конец другой: «Мама Фильтрует Воду, Гости Радуются» (Метрики, Фильтр, Визуализация, Гаджет, Рассылка). Рассылка последняя: отправляем только готовое.'},
+{id:'55',t:'metrics',k:'order',key:'вариант B',
+ q:'Последовательность расчёта юнит-экономики для оценки эффективности продукта',
+ steps:['Определение маржинальности','Расчёт стоимости привлечения клиента','Расчёт пожизненной ценности клиента','Расчёт срока окупаемости стоимости привлечения клиента','Анализ соотношения пожизненной ценности клиента и стоимости привлечения клиента'],
+ wrong:[
+  ['Расчёт стоимости привлечения клиента','Расчёт пожизненной ценности клиента','Определение маржинальности','Расчёт срока окупаемости','Анализ соотношения пожизненной ценности клиента и стоимости привлечения клиента'],
+  ['Расчёт пожизненной ценности клиента','Расчёт стоимости привлечения клиента','Анализ соотношения пожизненной ценности клиента и стоимости привлечения клиента','Расчёт срока окупаемости','Определение маржинальности']],
+ clue:'Начни с того, без чего LTV вообще не посчитать.',
+ memo:'Без МАРЖИ не посчитать LTV, поэтому маржа первая: Маржа → CAC → LTV → Окупаемость → LTV/CAC. «Маленький Слон Поливает Огород Аккуратно». Анализ соотношения — всегда финал.'},
+{id:'56',t:'metrics',k:'order',key:'вариант B',
+ q:'Последовательность действий аналитика при выявлении факторов, повлиявших на падение коэффициента удержания пользователей',
+ steps:['Сбор данных','Сегментация пользователей','Когортный анализ','Построение гипотез','Выявление корреляций','Формулировка выводов'],
+ wrong:[
+  ['Построение гипотез','Сбор данных','Когортный анализ','Сегментация пользователей','Выявление корреляций','Формулировка выводов'],
+  ['Формулировка выводов','Построение гипотез','Сбор данных','Когортный анализ','Сегментация пользователей','Выявление корреляций']],
+ clue:'Начинаем со сбора данных, а гипотезы строим только после когортного анализа.',
+ memo:'Сначала факты, потом идеи, в конце выводы: Собрал → Разделил на сегменты → Сравнил когорты → Предположил → Проверил связь → Сделал вывод.'},
+{id:'57',t:'metrics',k:'order',key:'вариант C',
+ q:'Правильная последовательность интерпретации результатов А/Б теста для принятия решения о внедрении изменения',
+ steps:['Запуск теста','Расчёт метрик по группам','Оценка статистической значимости','Анализ влияния на смежные метрики','Принятие решения о внедрении или отказе'],
+ wrong:[
+  ['Расчёт метрик по группам','Запуск теста','Оценка статистической значимости','Анализ влияния на смежные метрики','Принятие решения о внедрении или отказе'],
+  ['Запуск теста','Оценка статистической значимости','Расчёт метрик по группам','Принятие решения о внедрении','Анализ влияния на смежные метрики']],
+ clue:'Сначала запуск. Значимость можно оценить только после того, как посчитаны метрики.',
+ memo:'Запустил → Посчитал → Проверил значимость → Посмотрел побочные эффекты → Решил. Значимость не оценить без цифр, а решение всегда последнее.'},
+{id:'58',t:'metrics',k:'order',key:'вариант B',
+ q:'Последовательность разработки предложений по повышению эффективности продукта на основе анализа метрик',
+ steps:['Анализ метрик','Выявление проблемы','Генерация гипотез','Приоритизация гипотез','Оценка ожидаемого эффекта','Разработка плана экспериментов'],
+ wrong:[
+  ['Выявление проблемы','Анализ метрик','Генерация гипотез','Приоритизация гипотез','Разработка плана экспериментов','Оценка ожидаемого эффекта'],
+  ['Генерация гипотез','Приоритизация гипотез','Анализ метрик','Выявление проблемы','Оценка ожидаемого эффекта','Разработка плана экспериментов']],
+ clue:'Проблему видно только после анализа метрик. План экспериментов — в самом конце.',
+ memo:'Проблему находят В метриках, поэтому сначала анализ: Анализ → Проблема → Идеи → Сортировка → Эффект → План. «Анализ Показал Где Провал — Оцениваем, Планируем».'},
+{id:'59',t:'metrics',k:'order',key:'A → B → C → D',
+ q:'Упорядочите этапы постановки цели команде на основе показателя удержания пользователей',
+ steps:['Оценить текущее значение показателя удержания','Сформулировать целевое значение показателя','Распределить задачи между участниками команды','Проверить достижение результата по итогам периода'],
+ clue:'Сначала узнай, где ты сейчас, и только потом ставь цель.',
+ memo:'Где мы сейчас → Куда идём → Кто что делает → Дошли ли. Как поход: посмотрел на карту, выбрал вершину, раздал рюкзаки, проверил, дошли ли.'},
+{id:'60',t:'metrics',k:'order',key:'A → B → D → C',
+ q:'Упорядочите этапы работы руководителя при улучшении показателя конверсии',
+ steps:['Выявить этап, на котором пользователи чаще всего прекращают действие','Поставить команде цель по повышению конверсии','Назначить ответственных за доработку проблемного этапа','Оценить, достигнут ли целевой результат'],
+ clue:'Та же логика, что в №59: диагноз → цель → люди → проверка.',
+ memo:'Найти «дыру» в воронке → Поставить цель → Назначить ответственных → Проверить результат. Как врач: диагноз, цель лечения, кто лечит, контрольный анализ.'}
+];
+
+const QBY = Object.fromEntries(Q.map(q => [q.id, q]));
+const KIND = {term:'Термин', match:'Соответствие', order:'Последовательность'};
+const LETTERS = ['А','Б','В','Г','Д','Е'];
+const LEARN_N = 12, EXAM_N = 30;
+const LS_KEY = 'accr-bi-380305-v1';
+
+/* ---------- Icons ---------- */
+const sv = (p, s=20, w=2) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const I = {
+  x: sv('<path d="M6 6l12 12M18 6L6 18"/>'),
+  back: sv('<path d="M15 5l-7 7 7 7"/>'),
+  go: sv('<path d="M5 12h14M13 6l6 6-6 6"/>', 22, 2.2),
+  ok: sv('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 16, 2.6),
+  no: sv('<path d="M7 7l10 10M17 7L7 17"/>', 16, 2.6),
+  lamp: sv('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1.1 1.3 1.1 2.2h5c0-.9.5-1.7 1.1-2.2A6 6 0 0 0 12 3z"/>', 18, 1.8),
+  search: sv('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/>', 18),
+  plus: '+'
+};
+
+/* ---------- Helpers ---------- */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const LAT = {a:'а',c:'с',e:'е',o:'о',p:'р',x:'х',y:'у',k:'к',m:'м',t:'т',b:'в',h:'н'};
+function norm(s){
+  return String(s).toLowerCase().replace(/ё/g,'е')
+    .replace(/[«»"'`.,:;!?()\[\]]/g,' ').replace(/[-–—_/\\]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function normLoose(s){ // a word mixing Cyrillic with Latin look-alikes (e.g. Latin «o» typed by mistake) becomes all-Cyrillic
+  return norm(s).split(' ').map(w => (/[а-я]/.test(w) && /[a-z]/.test(w)) ? w.replace(/[acepoxykmtbh]/g, ch => LAT[ch]) : w).join(' ');
+}
+function lev(a, b){
+  if (a === b) return 0; if (!a.length) return b.length; if (!b.length) return a.length;
+  let prev = Array.from({length: b.length + 1}, (_, i) => i), cur = new Array(b.length + 1);
+  for (let i = 1; i <= a.length; i++){
+    cur[0] = i;
+    for (let j = 1; j <= b.length; j++){
+      cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    }
+    [prev, cur] = [cur, prev];
+  }
+  return prev[b.length];
+}
+function checkTyped(q, input){
+  let x = normLoose(input).replace(/^(это|ответ)\s+/,'');
+  if (!x) return {kind:'empty', ok:false};
+  const main = norm(q.a);
+  if (x === main) return {kind:'exact', ok:true};
+  const alts = (q.alt || []).map(norm);
+  if (alts.includes(x)) return {kind:'alt', ok:true};
+  // a known wrong option is never a «typo» (e.g. «формальный» vs «неформальный» differ by two letters)
+  if ((q.d || []).some(d => norm(d) === x)) return {kind:'wrong', ok:false};
+  if (/^не/.test(x) !== /^не/.test(main) && lev(x.replace(/^не/, ''), main.replace(/^не/, '')) <= 1) return {kind:'wrong', ok:false};
+  for (const v of [main, ...alts]){
+    const tol = v.length <= 5 ? 1 : v.length <= 12 ? 2 : Math.min(4, Math.floor(v.length * 0.15));
+    if (lev(x, v) <= tol) return {kind:'typo', ok:true};
+  }
+  return {kind:'wrong', ok:false};
+}
+function mask(a){ return a.replace(/[A-Za-zА-Яа-яЁё]+/g, w => w[0] + '_'.repeat(w.length - 1)); }
+function plural(n, one, few, many){ const m10 = n % 10, m100 = n % 100; if (m10 === 1 && m100 !== 11) return one; if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few; return many; }
+
+/* ---------- State ---------- */
+const S = {
+  view:'home', set:{mode:'auto', topics:Object.keys(TOPICS)}, prog:{}, t:0,
+  sess:null, cur:null, sync:'local', confirmReset:false,
+  listQ:'', listT:'all', hideAns:false, shown:{}
+};
+
+function sanitizeSet(){
+  if (!Array.isArray(S.set.topics)) S.set.topics = Object.keys(TOPICS);
+  S.set.topics = S.set.topics.filter(t => TOPICS[t]);
+  if (!S.set.topics.length) S.set.topics = Object.keys(TOPICS);
+  if (!['auto','choice','type'].includes(S.set.mode)) S.set.mode = 'auto';
+}
+function stored(){ return {v:1, prog:S.prog, set:{mode:S.set.mode, topics:S.set.topics.slice()}, t:S.t}; }
+function loadLocal(){
+  try {
+    const raw = localStorage.getItem(LS_KEY); if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d && typeof d === 'object'){
+      if (d.prog && typeof d.prog === 'object') S.prog = d.prog;
+      if (d.set && typeof d.set === 'object') S.set = Object.assign({}, S.set, d.set);
+      S.t = +d.t || 0;
+    }
+  } catch(e){}
+  sanitizeSet();
+}
+function writeLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(stored())); } catch(e){} }
+function save(){ S.t = Date.now(); writeLocal(); queueRemote(); }
+
+/* Cloud sync through the artifact's private per-user document (falls back to this device only). */
+let rref = null, rBusy = false, rDirty = false, rTimer = null, rRetry = 0;
+function queueRemote(){ if (!rref) return; rDirty = true; clearTimeout(rTimer); rTimer = setTimeout(flushRemote, 1200); }
+async function flushRemote(){
+  if (!rref || rBusy || !rDirty) return;
+  rBusy = true; rDirty = false;
+  try {
+    await rref.set(JSON.parse(JSON.stringify(stored())));
+    rRetry = 0;
+    if (S.sync !== 'cloud'){ S.sync = 'cloud'; softRender(); }
+  } catch(e){
+    const code = e && e.code;
+    if (code === 'unavailable' && rRetry < 1){ rRetry++; rDirty = true; setTimeout(flushRemote, 1200 + Math.random() * 1600); }
+    else if (code === 'invalid_argument' || code === 'revoked' || code === 'not_granted' || code === 'capability_disabled'){ rref = null; S.sync = 'local'; softRender(); }
+    else { rRetry = 0; }
+  } finally {
+    rBusy = false;
+    if (rDirty && rref && !rTimer) rTimer = setTimeout(flushRemote, 1200);
+  }
+}
+function mergeRemote(d){
+  let pulled = false, push = false;
+  const rp = d && d.prog && typeof d.prog === 'object' ? d.prog : {};
+  for (const id in rp){
+    if (!QBY[id] || !rp[id] || typeof rp[id] !== 'object') continue;
+    const r = rp[id], l = S.prog[id];
+    if (!l || (+r.t || 0) > (+l.t || 0)){ S.prog[id] = {b:+r.b || 0, c:+r.c || 0, w:+r.w || 0, t:+r.t || 0}; pulled = true; }
+    else if ((+l.t || 0) > (+r.t || 0)) push = true;
+  }
+  for (const id in S.prog){ if (!rp[id]) push = true; }
+  if (d && d.set && typeof d.set === 'object' && (+d.t || 0) > S.t){ S.set = {mode:d.set.mode, topics:Array.isArray(d.set.topics) ? d.set.topics.slice() : null}; sanitizeSet(); S.t = +d.t; pulled = true; }
+  else if (S.t > (+(d && d.t) || 0)) push = true;
+  return {pulled, push};
+}
+async function connect(){
+  const C = window.claude;
+  if (!C || typeof C.use !== 'function') return;
+  try {
+    const [db, user] = await Promise.all([C.use('db'), C.use('user')]);
+    if (!db || !user) return;
+    const uid = await user.id();
+    if (!uid) return;
+    const ref = db.doc('data/users/' + uid + '/progress');
+    const snap = await ref.get();
+    let push = true;
+    if (snap.exists){
+      const r = mergeRemote(snap.data());
+      push = r.push;
+      if (r.pulled) writeLocal();
+    }
+    rref = ref; S.sync = 'cloud';
+    if (push){ rDirty = true; flushRemote(); }
+    softRender();
+  } catch(e){ /* stays on this device */ }
+}
+
+/* ---------- Progress model (Leitner boxes 0..5) ---------- */
+function lvl(id){
+  const p = S.prog[id];
+  if (!p) return 'new';
+  if (p.b >= 3) return '3';
+  if (p.b === 2) return '2';
+  if (p.b === 1) return '1';
+  return p.w > 0 ? 'bad' : 'new';
+}
+const LV_NAME = {new:'новый', bad:'ошибка', '1':'знаком', '2':'почти', '3':'выучено'};
+function stats(ids){ const s = {new:0, bad:0, '1':0, '2':0, '3':0}; ids.forEach(id => s[lvl(id)]++); s.n = ids.length; return s; }
+function mistakes(){ return Q.filter(q => lvl(q.id) === 'bad').map(q => q.id); }
+function record(id, ok, hinted){
+  const p = Object.assign({b:0, c:0, w:0, t:0}, S.prog[id]);
+  if (ok){ p.c++; if (!hinted) p.b = Math.min(5, p.b + 1); }
+  else { p.w++; p.b = 0; }
+  p.t = Date.now();
+  S.prog[id] = p;
+  save();
+}
+
+/* ---------- Sessions ---------- */
+function prio(id){
+  const p = S.prog[id];
+  if (!p) return 1;
+  if (p.b === 0) return p.w > 0 ? 0 : 1;
+  return 1 + p.b;
+}
+function startLearn(ids){
+  if (!ids){
+    const pool = shuffle(Q.filter(q => S.set.topics.includes(q.t)).map(q => q.id));
+    pool.sort((a, b) => prio(a) - prio(b) || ((S.prog[a] && S.prog[a].t) || 0) - ((S.prog[b] && S.prog[b].t) || 0));
+    ids = pool.slice(0, LEARN_N);
+  }
+  S.sess = {kind:'learn', ids:ids.slice(), queue:ids.slice(), first:{}, passed:{}, res:{}, done:false};
+  S.view = 'card'; nextCard();
+}
+function startExam(){
+  const ids = shuffle(Q.map(q => q.id)).slice(0, EXAM_N);
+  S.sess = {kind:'exam', ids:ids.slice(), queue:ids.slice(), first:{}, passed:{}, res:{}, done:false};
+  S.view = 'card'; nextCard();
+}
+function modeFor(q, exam){
+  const pref = S.set.mode, p = S.prog[q.id], known = p && p.b >= 1;
+  if (q.k === 'match') return 'match';
+  if (q.k === 'order'){
+    if (!q.wrong) return 'order';
+    if (pref === 'choice') return 'chain';
+    if (pref === 'type') return 'order';
+    if (exam) return Math.random() < .5 ? 'chain' : 'order';
+    return known ? 'order' : 'chain';
+  }
+  if (pref === 'choice') return 'choice';
+  if (pref === 'type') return 'type';
+  if (exam) return Math.random() < .5 ? 'choice' : 'type';
+  return known ? 'type' : 'choice';
+}
+function makeCard(id){
+  const q = QBY[id], exam = S.sess.kind === 'exam';
+  const c = {id, mode:modeFor(q, exam), hint:0, answered:false, ok:null, verdict:'', given:'', picked:null, typed:'', fresh:true};
+  if (c.mode === 'choice') c.opts = shuffle([q.a].concat(shuffle(q.d).slice(0, 3)));
+  if (c.mode === 'chain') c.chains = shuffle([0, 1, 2]); // 0 = correct chain, 1..2 = q.wrong[i-1]
+  if (c.mode === 'match'){ c.L = shuffle(q.pairs.map((_, i) => i)); c.R = shuffle(q.pairs.map((_, i) => i)); c.asg = {}; c.act = 0; }
+  if (c.mode === 'order'){ c.pool = shuffle(q.steps.map((_, i) => i)); if (c.pool.every((v, i) => v === i)) c.pool.reverse(); c.seq = []; }
+  return c;
+}
+function nextCard(){
+  const s = S.sess;
+  if (!s.queue.length){ s.done = true; S.cur = null; S.view = 'result'; render(); scrollTop(); return; }
+  const id = s.queue.shift();
+  S.cur = makeCard(id);
+  render(); scrollTop();
+  if (S.cur.mode === 'type'){ const inp = document.getElementById('ans'); if (inp) try { inp.focus({preventScroll:true}); } catch(e){} }
+}
+function finalize(ok, given, verdict){
+  const c = S.cur, s = S.sess, q = QBY[c.id];
+  c.answered = true; c.ok = ok; c.given = given; c.verdict = verdict || (ok ? 'exact' : 'wrong');
+  const firstTime = !(c.id in s.first);
+  if (firstTime){
+    c.prev = S.prog[c.id] ? Object.assign({}, S.prog[c.id]) : null;
+    s.first[c.id] = ok;
+    s.res[c.id] = {ok, given, mode:c.mode};
+    record(c.id, ok, c.hint > 0);
+  }
+  c.recorded = firstTime;
+  if (ok) s.passed[c.id] = true;
+  if (s.kind === 'learn' && !ok){ s.queue.splice(Math.min(3, s.queue.length), 0, c.id); c.requeued = true; }
+  if (s.kind === 'exam'){ nextCard(); return; }
+  render();
+  requestAnimationFrame(() => { const fb = document.querySelector('.fb'); if (fb && fb.scrollIntoView) fb.scrollIntoView({block:'nearest', behavior:'smooth'}); });
+}
+function overrideCorrect(){
+  const c = S.cur, s = S.sess;
+  if (!c || !c.answered || c.ok) return;
+  if (c.recorded){
+    if (c.prev) S.prog[c.id] = c.prev; else delete S.prog[c.id];
+    s.first[c.id] = true; s.res[c.id] = {ok:true, given:c.given, mode:c.mode};
+    record(c.id, true, c.hint > 0);
+  }
+  if (c.requeued){ const i = s.queue.indexOf(c.id); if (i >= 0) s.queue.splice(i, 1); c.requeued = false; }
+  s.passed[c.id] = true;
+  c.ok = true; c.verdict = 'override';
+  render();
+}
+
+/* ---------- Views ---------- */
+function segbar(st, thin){
+  const n = st.n || 1, parts = [['3','c-3'],['2','c-2'],['1','c-1'],['bad','c-bad'],['new','c-new']];
+  return `<div class="seg${thin ? ' thin' : ''}" role="img" aria-label="выучено ${st['3']} из ${st.n}">${parts.filter(p => st[p[0]]).map(p => `<span class="${p[1]}" style="width:${(st[p[0]] / n * 100).toFixed(2)}%"></span>`).join('')}</div>`;
+}
+function vHome(){
+  const all = stats(Q.map(q => q.id)), mist = mistakes();
+  const s = S.sess;
+  const resume = s && !s.done && S.cur ? `<button class="resume" data-act="resume"><span>${s.kind === 'exam' ? 'Экзамен' : 'Подход'} не закончен: <b>${s.kind === 'exam' ? Object.keys(s.res).length + ' из ' + s.ids.length : Object.keys(s.passed).length + ' из ' + s.ids.length}</b></span><span>Продолжить ${I.go}</span></button>` : '';
+  const modeNote = {
+    auto:'Новые вопросы — выбор из вариантов. Как только ответишь верно, в следующий раз впишешь ответ сам.',
+    choice:'Всегда выбор из четырёх вариантов. Варианты каждый раз перемешиваются.',
+    type:'Всегда вписываешь ответ сам. Регистр, «ё» и мелкие опечатки не важны.'
+  }[S.set.mode];
+  return `
+  <header class="hero">
+    <div class="eyebrow">38.03.05 · Бизнес-информатика</div>
+    <h1>Тренажёр <mark class="hl">аккредитации</mark></h1>
+    <p class="lead">${Q.length} вопрос из ключа. На экзамене будет 30 случайных, а варианты могут поменять местами, поэтому здесь учим сами ответы, а не буквы.</p>
+  </header>
+  <section class="panel prog" aria-label="Прогресс">
+    <div class="prog-head"><div><span class="big">${all['3']}</span><span class="of"> из ${Q.length} выучено</span></div><div class="prog-cap">ошибок сейчас: ${mist.length}</div></div>
+    ${segbar(all)}
+    <div class="legend"><span><i class="c-3"></i>выучено</span><span><i class="c-2"></i>почти</span><span><i class="c-1"></i>знаком</span><span><i class="c-bad"></i>ошибка</span><span><i class="c-new"></i>новый</span></div>
+    <div class="topics">${Object.keys(TOPICS).map(t => { const ids = Q.filter(q => q.t === t).map(q => q.id), st = stats(ids); return `<div class="trow"><b>${esc(TOPICS[t].name)}</b><span class="n">${st['3']}/${st.n}</span>${segbar(st, true)}</div>`; }).join('')}</div>
+  </section>
+  ${resume}
+  <section class="actions">
+    <button class="act main" data-act="learn"><span style="display:flex;flex-direction:column;gap:3px"><span class="act-t">Учить</span><span class="act-s">${LEARN_N} карточек: сначала ошибки, потом новые</span></span><span class="go">${I.go}</span></button>
+    <button class="act" data-act="exam"><span class="act-t">Экзамен</span><span class="act-s">30 случайных вопросов без подсказок, итог в конце</span></button>
+    <button class="act" data-act="mist" ${mist.length ? '' : 'disabled'}><span class="act-t">Ошибки ${mist.length ? `<span class="cnt">${mist.length}</span>` : ''}</span><span class="act-s">${mist.length ? 'Повторить вопросы с ошибками' : 'Пока ошибок нет'}</span></button>
+    <button class="act" data-act="list" style="grid-column:1/-1;min-height:0"><span class="act-t">Шпаргалка</span><span class="act-s">Все ${Q.length} ответов с ассоциациями, поиск и режим «закрыть ответы»</span></button>
+  </section>
+  <section class="panel settings" aria-label="Настройки">
+    <h2>Темы для «Учить»</h2>
+    <div class="chips">${Object.keys(TOPICS).map(t => `<button class="chip${S.set.topics.includes(t) ? ' on' : ''}" data-act="topic" data-t="${t}" aria-pressed="${S.set.topics.includes(t)}">${esc(TOPICS[t].name)} · ${Q.filter(q => q.t === t).length}</button>`).join('')}</div>
+    <h2>Вопросы-термины</h2>
+    <div class="segctl" role="group" aria-label="Как отвечать">${[['auto','Авто'],['choice','Выбор'],['type','Вписать']].map(m => `<button data-act="mode" data-m="${m[0]}" class="${S.set.mode === m[0] ? 'on' : ''}" aria-pressed="${S.set.mode === m[0]}">${m[1]}</button>`).join('')}</div>
+    <p class="note">${modeNote}</p>
+  </section>
+  <footer class="foot">
+    <div class="sync"><span class="dot${S.sync === 'cloud' ? ' on' : ''}"></span>${S.sync === 'cloud' ? 'Прогресс сохраняется в твоём аккаунте Claude и виден на всех устройствах.' : 'Прогресс сохраняется в этом браузере.'}</div>
+    ${S.confirmReset ? `<div class="confirm"><span>Стереть весь прогресс?</span><button class="btn ghost" data-act="reset-yes" style="min-height:38px;color:var(--bad)">Стереть</button><button class="btn ghost" data-act="reset-no" style="min-height:38px">Отмена</button></div>` : `<button class="linkbtn" data-act="reset">Сбросить прогресс</button>`}
+  </footer>`;
+}
+
+function vTop(){
+  const s = S.sess, total = s.ids.length;
+  const done = s.kind === 'exam' ? Object.keys(s.res).length : Object.keys(s.passed).length;
+  const label = s.kind === 'exam' ? `Вопрос ${Math.min(done + 1, total)} из ${total}` : `Усвоено ${done} из ${total}`;
+  return `<div class="top"><div class="top-row">
+      <button class="iconbtn" data-act="home" aria-label="На главную">${I.x}</button>
+      <div class="top-mid"><b>${s.kind === 'exam' ? 'Экзамен' : 'Учить'}</b><span>${label}</span></div>
+    </div><div class="bar"><i style="width:${(done / total * 100).toFixed(1)}%"></i></div></div>`;
+}
+function taskLine(c){
+  return {choice:'Выбери ответ', type:'Впиши ответ', chain:'Выбери правильную цепочку', match:'Сопоставь: нажми на пункт слева, потом на его пару', order:'Нажимай шаги по порядку, от первого к последнему'}[c.mode];
+}
+function vCard(){
+  const c = S.cur, q = QBY[c.id], s = S.sess, learn = s.kind === 'learn';
+  let body = '';
+  if (c.mode === 'choice') body = vChoice(c, q);
+  else if (c.mode === 'type') body = vType(c, q);
+  else if (c.mode === 'chain') body = vChain(c, q);
+  else if (c.mode === 'match') body = c.answered ? vMatchResult(c, q) : vMatch(c, q);
+  else body = c.answered ? vOrderResult(c, q) : vOrder(c, q);
+  const hint = (!c.answered && c.hint > 0) ? `<div class="hint">${I.lamp}<div>${esc(q.clue)}${c.hint > 1 && q.k === 'term' ? `<div class="mask">${esc(mask(q.a))}</div>` : ''}</div></div>` : '';
+  return `${vTop()}
+    <div class="qmeta"><span class="tag">№ ${esc(q.id)}</span><span class="tag k">${KIND[q.k]}</span><span class="tag">${esc(TOPICS[q.t].name)}</span></div>
+    <p class="qtext">${esc(q.q)}</p>
+    ${c.answered ? '' : `<p class="task">${taskLine(c)}</p>`}
+    ${hint}
+    ${body}
+    ${c.answered && learn ? vFeedback(c, q) : ''}
+    <div class="spacer"></div>
+    ${vActions(c, q, learn)}`;
+}
+function vChoice(c, q){
+  return `<div class="opts">${c.opts.map((o, i) => {
+    let cls = '';
+    if (c.answered){ if (o === q.a) cls = 'right'; else if (i === c.picked) cls = 'wrong'; else cls = 'dim'; }
+    else if (i === c.picked) cls = 'sel';
+    return `<button class="opt ${cls}" data-act="pick" data-i="${i}" ${c.answered ? 'disabled' : ''}><span class="ltr">${LETTERS[i]}</span><span class="tx">${esc(o)}</span></button>`;
+  }).join('')}</div>`;
+}
+function chainSteps(q, ci){ return ci === 0 ? q.steps : q.wrong[ci - 1]; }
+function vChain(c, q){
+  return `<div class="opts">${c.chains.map((ci, i) => {
+    let cls = '';
+    if (c.answered){ if (ci === 0) cls = 'right'; else if (i === c.picked) cls = 'wrong'; else cls = 'dim'; }
+    else if (i === c.picked) cls = 'sel';
+    return `<button class="opt ${cls}" data-act="pick" data-i="${i}" ${c.answered ? 'disabled' : ''} style="align-items:flex-start"><span class="ltr">${LETTERS[i]}</span><ol class="chain tx">${chainSteps(q, ci).map((st, k) => `<li><span>${k + 1}</span>${esc(st)}</li>`).join('')}</ol></button>`;
+  }).join('')}</div>`;
+}
+function vType(c, q){
+  const cls = c.answered ? (c.ok ? 'right' : 'wrong') : '';
+  return `<form class="typein" data-form="type" autocomplete="off">
+    <input id="ans" class="${cls}" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" enterkeyhint="done" placeholder="Твой ответ" value="${esc(c.typed)}" ${c.answered ? 'disabled' : ''} aria-label="Ответ">
+    ${c.answered ? '' : '<span class="note">Регистр, «ё» и небольшие опечатки не важны</span>'}
+  </form>`;
+}
+function vMatch(c, q){
+  const usedBy = {}; Object.keys(c.asg).forEach(lp => { usedBy[c.asg[lp]] = +lp; });
+  return `<div class="sub">Пункты</div>
+  <ol class="ml-list">${c.L.map((pi, lp) => {
+    const a = c.asg[lp];
+    return `<li><button class="ml${c.act === lp ? ' on' : ''}" data-act="ml" data-i="${lp}" aria-pressed="${c.act === lp}"><span class="pn p${lp}">${lp + 1}</span><span class="tx">${esc(q.pairs[pi][0])}</span><span class="slot${a != null ? ' full' : ''}">${a != null ? LETTERS[a] : '?'}</span></button></li>`;
+  }).join('')}</ol>
+  <div class="sub">Пары для пункта ${c.act + 1}</div>
+  <ul class="mr-list">${c.R.map((pi, rp) => {
+    const lp = usedBy[rp];
+    return `<li><button class="mr${lp != null ? ' used' : ''}" data-act="mr" data-j="${rp}"><span class="ltr">${LETTERS[rp]}</span><span class="tx">${esc(q.pairs[pi][1])}</span>${lp != null ? `<span class="pn p${lp}">${lp + 1}</span>` : ''}</button></li>`;
+  }).join('')}</ul>`;
+}
+function vMatchResult(c, q){
+  return `<ul class="mres">${c.L.map((pi, lp) => {
+    const a = c.asg[lp], chosen = a != null ? c.R[a] : null, ok = chosen === pi;
+    return `<li class="${ok ? 'ok' : 'no'}">
+      <span class="l">${esc(q.pairs[pi][0])}</span>
+      ${!ok && chosen != null ? `<span class="yours">${esc(q.pairs[chosen][1])}</span>` : ''}
+      <span class="r"><span class="${ok ? 'ok-i' : 'no-i'}">${ok ? I.ok : I.no}</span><span><mark class="hl">${esc(q.pairs[pi][1])}</mark></span></span>
+      <span class="memo-s">${I.lamp}<span>${esc(q.pairs[pi][2])}</span></span>
+    </li>`;
+  }).join('')}</ul>`;
+}
+function vOrder(c, q){
+  const n = q.steps.length;
+  const seq = c.seq.map((si, pos) => `<li><button class="ob" data-act="ou" data-i="${pos}" aria-label="Убрать шаг ${pos + 1}"><span class="num">${pos + 1}</span><span class="tx">${esc(q.steps[si])}</span><span class="x">${I.x}</span></button></li>`).join('');
+  const empties = Array.from({length: n - c.seq.length}, (_, k) => `<li class="o-empty"><span class="num">${c.seq.length + k + 1}</span>${k === 0 ? 'нажми шаг ниже' : ''}</li>`).join('');
+  const pool = c.pool.filter(si => !c.seq.includes(si)).map(si => `<li><button class="ob" data-act="op" data-i="${si}"><span class="plus">+</span><span class="tx">${esc(q.steps[si])}</span></button></li>`).join('');
+  return `<div class="sub">Твой порядок</div><ol class="o-seq">${seq}${empties}</ol>
+    ${pool ? `<div class="sub">Шаги</div><ul class="o-pool">${pool}</ul>` : ''}`;
+}
+function vOrderResult(c, q){
+  const yours = c.seq.map(si => si + 1);
+  return `<ol class="ores">${q.steps.map((st, i) => {
+    const ok = c.seq[i] === i;
+    return `<li class="${ok ? 'ok' : 'no'}"><span class="num">${i + 1}</span><span class="tx">${esc(st)}</span><span class="st ${ok ? 'ok-i' : 'no-i'}">${ok ? I.ok : I.no}</span></li>`;
+  }).join('')}</ol>
+  ${!c.ok && yours.length ? `<p class="yourorder">Твой порядок: ${yours.join(' → ')} (номера шагов из правильного списка выше)</p>` : ''}`;
+}
+function vFeedback(c, q){
+  const good = c.ok;
+  const head = good
+    ? ({exact: c.hint ? 'Верно, но с подсказкой' : 'Верно', alt:'Засчитано', typo:'Засчитано, есть опечатка', override:'Засчитано вручную'}[c.verdict] || 'Верно')
+    : (c.verdict === 'skip' ? 'Запоминаем ответ' : 'Неверно');
+  let ans = '';
+  if (q.k === 'term'){
+    const note = (c.verdict === 'alt' || c.verdict === 'typo') ? '<small>В ключе написано так:</small>' : '<small>Ответ</small>';
+    ans = `<div class="fb-ans">${note}<mark class="hl">${esc(q.a)}</mark></div>`;
+    if (c.mode === 'type' && !good && c.given && c.verdict !== 'skip') ans += `<div class="yours">Твой ответ: <s>${esc(c.given)}</s></div><button class="override" data-act="override">Мой ответ тоже верный, засчитать</button>`;
+  }
+  const memo = q.k === 'match' ? `<div class="memo">${I.lamp}<div><div class="memo-k">Как запомнить</div>${esc(q.clue)}</div></div>`
+    : `<div class="memo">${I.lamp}<div><div class="memo-k">Как запомнить</div>${esc(q.memo)}</div></div>`;
+  const again = !good ? `<p class="note">Этот вопрос вернётся через пару карточек.</p>` : '';
+  return `<section class="fb ${good ? 'good' : 'bad'}">
+    <div class="fb-h" role="status"><span class="ic">${good ? I.ok : I.no}</span>${head}</div>
+    ${ans}${memo}${again}
+  </section>`;
+}
+function vActions(c, q, learn){
+  if (c.answered) return `<div class="abar"><button class="btn pri" data-act="next">Дальше ${I.go}</button></div>`;
+  const hintBtn = learn ? `<button class="btn ghost${c.hint ? ' on' : ''}" data-act="hint" aria-label="Подсказка">${I.lamp}${c.hint && q.k === 'term' && c.mode === 'type' && c.hint < 2 ? 'Ещё' : 'Подсказка'}</button>` : '';
+  const skip = `<button class="btn ghost" data-act="skip">Не знаю</button>`;
+  if (c.mode === 'choice' || c.mode === 'chain'){
+    if (learn) return `<div class="abar">${hintBtn}${skip}</div>`;
+    return `<div class="abar">${skip}<button class="btn pri" data-act="submit" ${c.picked == null ? 'disabled' : ''}>Ответить</button></div>`;
+  }
+  if (c.mode === 'type') return `<div class="abar">${hintBtn}${skip}<button class="btn pri" data-act="submit">Проверить</button></div>`;
+  const ready = c.mode === 'match' ? Object.keys(c.asg).length === q.pairs.length : c.seq.length === q.steps.length;
+  return `<div class="abar">${hintBtn}${skip}<button class="btn pri" data-act="submit" ${ready ? '' : 'disabled'}>${learn ? 'Проверить' : 'Ответить'}</button></div>`;
+}
+
+function answerHtml(q, withMemo){
+  if (q.k === 'term') return `<p class="ans"><mark class="hl">${esc(q.a)}</mark></p>${withMemo ? `<div class="memo">${I.lamp}<div><div class="memo-k">Как запомнить</div>${esc(q.memo)}</div></div>` : ''}`;
+  if (q.k === 'match') return `<ul class="pairs">${q.pairs.map(p => `<li><span class="pl">${esc(p[0])}</span><span class="pr"><mark class="hl">${esc(p[1])}</mark></span>${withMemo ? `<span class="memo-s">${I.lamp}<span>${esc(p[2])}</span></span>` : ''}</li>`).join('')}</ul>`;
+  return `<ol class="steps">${q.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>${withMemo ? `<div class="memo">${I.lamp}<div><div class="memo-k">Как запомнить</div>${esc(q.memo)}</div></div>` : ''}<span class="key">в ключе: ${esc(q.key)}</span>`;
+}
+function shortAns(q){ return q.k === 'term' ? q.a : q.k === 'match' ? 'Соответствие: ' + q.pairs.map(p => p[0]).join(' / ') : 'Последовательность: ' + q.steps[0] + ' → …'; }
+
+function vResult(){
+  const s = S.sess, ids = s.ids, okN = ids.filter(id => s.first[id]).length;
+  if (s.kind === 'exam'){
+    const pct = Math.round(okN / ids.length * 100), wrong = ids.filter(id => !s.first[id]);
+    return `<div class="backrow"><button class="iconbtn" data-act="home" aria-label="На главную">${I.back}</button><span class="eyebrow">Экзамен завершён</span></div>
+      <section class="panel score">
+        <div><span class="big">${okN}</span><span class="of"> / ${ids.length}</span></div>
+        <div class="bar" style="width:100%;height:10px"><i style="width:${pct}%"></i></div>
+        <span class="pct">${pct}% верно · ошибок: ${wrong.length}</span>
+      </section>
+      ${wrong.length ? `<div class="btnrow"><button class="btn pri" data-act="fix">Проработать ${wrong.length} ${plural(wrong.length,'ошибку','ошибки','ошибок')}</button></div>
+      <h2 class="sec">Разбор ошибок</h2>
+      <div class="items">${wrong.map(id => { const q = QBY[id], r = s.res[id]; return `<article class="item">
+        <div class="qmeta"><span class="tag">№ ${esc(q.id)}</span><span class="tag k">${KIND[q.k]}</span></div>
+        <p class="q">${esc(q.q)}</p>
+        ${r && r.given ? `<p class="yours">Твой ответ: <s>${esc(r.given)}</s></p>` : ''}
+        ${answerHtml(q, true)}</article>`; }).join('')}</div>` : '<p class="empty">Ни одной ошибки. Так держать.</p>'}
+      <div class="btnrow"><button class="btn" data-act="exam">Новый экзамен</button><button class="btn" data-act="home">На главную</button></div>`;
+  }
+  return `<div class="backrow"><button class="iconbtn" data-act="home" aria-label="На главную">${I.back}</button><span class="eyebrow">Подход завершён</span></div>
+    <section class="panel score">
+      <div><span class="big">${okN}</span><span class="of"> из ${ids.length} с первого раза</span></div>
+      <span class="pct">Вопросы с ошибками попадут в «Ошибки» и придут первыми в следующем подходе.</span>
+    </section>
+    <ul class="rlist">${ids.map(id => { const q = QBY[id], ok = s.first[id]; return `<li><span class="st ${ok ? 'ok' : 'no'}">${ok ? I.ok : I.no}</span><span class="tx"><span class="num">№ ${esc(q.id)}</span> ${esc(shortAns(q))}</span></li>`; }).join('')}</ul>
+    <div class="btnrow"><button class="btn pri" data-act="learn">Ещё подход ${I.go}</button><button class="btn" data-act="home">На главную</button></div>`;
+}
+
+function vList(){
+  return `<div class="backrow"><button class="iconbtn" data-act="home" aria-label="На главную">${I.back}</button><h1>Шпаргалка</h1></div>
+  <div class="listhead">
+    <label class="search">${I.search}<input id="lq" type="search" placeholder="Поиск по вопросам и ответам" value="${esc(S.listQ)}" autocomplete="off" aria-label="Поиск"></label>
+    <div class="chips">${[['all','Все']].concat(Object.keys(TOPICS).map(t => [t, TOPICS[t].name])).map(t => `<button class="chip${S.listT === t[0] ? ' on' : ''}" data-act="ltopic" data-t="${t[0]}">${esc(t[1])}</button>`).join('')}</div>
+    <label class="toggle"><input id="hide" type="checkbox" ${S.hideAns ? 'checked' : ''}> Закрыть ответы (проверь себя, потом открой)</label>
+  </div>
+  <div class="items" id="items">${vItems()}</div>`;
+}
+function vItems(){
+  const nq = norm(S.listQ);
+  const list = Q.filter(q => (S.listT === 'all' || q.t === S.listT) && (!nq || norm(q.q + ' ' + JSON.stringify(q.a || q.pairs || q.steps)).includes(nq)));
+  if (!list.length) return `<p class="empty">Ничего не нашлось. Попробуй другое слово.</p>`;
+  return list.map(q => {
+    const lv = lvl(q.id), open = !S.hideAns || S.shown[q.id];
+    return `<article class="item">
+      <div class="qmeta"><span class="tag">№ ${esc(q.id)}</span><span class="tag k">${KIND[q.k]}</span><span class="lv l-${lv}">${LV_NAME[lv]}</span></div>
+      <p class="q">${esc(q.q)}</p>
+      ${open ? answerHtml(q, true) : `<button class="reveal" data-act="reveal" data-id="${esc(q.id)}">Показать ответ</button>`}
+    </article>`;
+  }).join('');
+}
+
+/* ---------- Render ---------- */
+const app = document.getElementById('app');
+function render(){
+  let html = '';
+  if (S.view === 'card' && S.cur) html = vCard();
+  else if (S.view === 'result' && S.sess) html = vResult();
+  else if (S.view === 'list') html = vList();
+  else { S.view = 'home'; html = vHome(); }
+  app.innerHTML = html;
+}
+function softRender(){ if (S.view === 'home') render(); }
+function scrollTop(){ try { window.scrollTo(0, 0); } catch(e){} }
+
+/* ---------- Events ---------- */
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  const act = b.dataset.act, c = S.cur, q = c && QBY[c.id], learn = S.sess && S.sess.kind === 'learn';
+  switch (act){
+    case 'learn': startLearn(); break;
+    case 'exam': startExam(); break;
+    case 'mist': startLearn(shuffle(mistakes()).slice(0, 20)); break;
+    case 'fix': { const s = S.sess; startLearn(s.ids.filter(id => !s.first[id])); break; }
+    case 'list': S.view = 'list'; render(); scrollTop(); break;
+    case 'home': S.view = 'home'; S.confirmReset = false; render(); scrollTop(); break;
+    case 'resume': S.view = 'card'; render(); scrollTop(); break;
+    case 'topic': {
+      const t = b.dataset.t, on = S.set.topics.includes(t);
+      if (on && S.set.topics.length === 1) break;
+      S.set.topics = on ? S.set.topics.filter(x => x !== t) : S.set.topics.concat(t);
+      save(); render(); break;
+    }
+    case 'mode': S.set.mode = b.dataset.m; save(); render(); break;
+    case 'reset': S.confirmReset = true; render(); break;
+    case 'reset-no': S.confirmReset = false; render(); break;
+    case 'reset-yes': S.prog = {}; S.sess = null; S.cur = null; S.confirmReset = false; save(); render(); break;
+    case 'ltopic': S.listT = b.dataset.t; render(); break;
+    case 'reveal': S.shown[b.dataset.id] = true; document.getElementById('items').innerHTML = vItems(); break;
+    case 'hint': {
+      if (!c || c.answered) break;
+      c.hint = Math.min(c.hint + 1, (q.k === 'term' && c.mode === 'type') ? 2 : 1);
+      render();
+      const inp = document.getElementById('ans'); if (inp) try { inp.focus({preventScroll:true}); } catch(err){}
+      break;
+    }
+    case 'skip': if (!c || c.answered) break; finalize(false, '', 'skip'); break;
+    case 'pick': {
+      if (!c || c.answered) break;
+      c.picked = +b.dataset.i;
+      if (learn) submit(); else render();
+      break;
+    }
+    case 'submit': submit(); break;
+    case 'next': nextCard(); break;
+    case 'override': overrideCorrect(); break;
+    case 'ml': if (c && !c.answered){ c.act = +b.dataset.i; render(); } break;
+    case 'mr': {
+      if (!c || c.answered) break;
+      const rp = +b.dataset.j;
+      Object.keys(c.asg).forEach(lp => { if (c.asg[lp] === rp) delete c.asg[lp]; });
+      c.asg[c.act] = rp;
+      const n = c.L.length;
+      for (let k = 1; k <= n; k++){ const lp = (c.act + k) % n; if (c.asg[lp] == null){ c.act = lp; break; } }
+      render(); break;
+    }
+    case 'op': if (c && !c.answered){ c.seq.push(+b.dataset.i); render(); } break;
+    case 'ou': if (c && !c.answered){ c.seq.splice(+b.dataset.i, 1); render(); } break;
+  }
+});
+function submit(){
+  const c = S.cur; if (!c || c.answered) return;
+  const q = QBY[c.id];
+  if (c.mode === 'choice'){ if (c.picked == null) return; const o = c.opts[c.picked]; finalize(o === q.a, o); return; }
+  if (c.mode === 'chain'){ if (c.picked == null) return; const ci = c.chains[c.picked]; finalize(ci === 0, chainSteps(q, ci).join(' → ')); return; }
+  if (c.mode === 'type'){
+    const inp = document.getElementById('ans'); if (inp) c.typed = inp.value;
+    const r = checkTyped(q, c.typed);
+    if (r.kind === 'empty'){ if (inp){ inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake'); inp.focus(); } return; }
+    finalize(r.ok, c.typed.trim(), r.kind); return;
+  }
+  if (c.mode === 'match'){
+    if (Object.keys(c.asg).length < q.pairs.length) return;
+    const ok = c.L.every((pi, lp) => c.R[c.asg[lp]] === pi);
+    finalize(ok, c.L.map((pi, lp) => q.pairs[pi][0] + ' → ' + q.pairs[c.R[c.asg[lp]]][1]).join('; '));
+    return;
+  }
+  if (c.mode === 'order'){
+    if (c.seq.length < q.steps.length) return;
+    finalize(c.seq.every((si, i) => si === i), c.seq.map(si => q.steps[si]).join(' → '));
+  }
+}
+app.addEventListener('input', e => {
+  if (e.target.id === 'ans' && S.cur) S.cur.typed = e.target.value;
+  if (e.target.id === 'lq'){ S.listQ = e.target.value; document.getElementById('items').innerHTML = vItems(); }
+});
+app.addEventListener('change', e => {
+  if (e.target.id === 'hide'){ S.hideAns = e.target.checked; S.shown = {}; document.getElementById('items').innerHTML = vItems(); }
+});
+app.addEventListener('submit', e => { e.preventDefault(); if (e.target.dataset.form === 'type') submit(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || S.view !== 'card' || !S.cur) return;
+  if (S.cur.answered && !(e.target && e.target.closest && e.target.closest('button'))){ e.preventDefault(); nextCard(); }
+});
+
+/* ---------- Boot ---------- */
+function start(data){
+  loadLocal();
+  if (data && data.sess && data.cur && QBY[data.cur.id]){
+    try { S.sess = data.sess; S.cur = data.cur; S.view = data.view || 'card'; } catch(e){ S.sess = null; S.cur = null; S.view = 'home'; }
+  }
+  render();
+  connect();
+}
+const hot = window.claude && window.claude.hot;
+if (hot && hot.snapshot) try { hot.snapshot(() => ({sess:S.sess, cur:S.cur, view:S.view})); } catch(e){}
+if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
+})();
+</script>
+</body></html>
